@@ -1,0 +1,90 @@
+<div class="solver-flow-svg solver-flow-svg--overview" role="img" aria-label="Acceptance phases overview">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 714">
+  <defs>
+    <marker id="f2-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,5 0,10" style="fill: var(--color-foreground-muted, #6b6f76); stroke: none;"/>
+    </marker>
+    <marker id="f2-ar" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,5 0,10" style="fill: var(--color-admonition-title--danger, #ff5252); stroke: none;"/>
+    </marker>
+  </defs>
+
+  <!--
+    Main column:  x=30..470 (w=440, cx=250)
+    Rejection bus: x=490, y=96..584
+    Reject box:    x=504..672 (w=168, cx=588), y=252..396
+
+    y layout:
+      A: y=20..96    cy=58
+      B: y=112..188  cy=150
+      C: y=204..280  cy=242
+      D: y=296..396  cy=346  (taller, sf-ref, 2 lines)
+      E: y=412..512  cy=462  (taller, sf-ref, 2 lines)
+      F: y=528..604  cy=566
+      Accept: y=620..684
+  -->
+
+  <!-- Rejection bus -->
+  <line x1="490" y1="96" x2="490" y2="584" class="sf-edge-rej"/>
+  <!-- Bus → reject box mid -->
+  <path d="M 490 324 H 504" class="sf-edge-rej" marker-end="url(#f2-ar)"/>
+
+  <!-- Reject box -->
+  <rect x="504" y="252" width="168" height="144" rx="7" class="sf-box sf-fail"/>
+  <text x="588" y="304" text-anchor="middle" class="sf-lbl" font-size="13">Reject</text>
+  <text x="588" y="322" text-anchor="middle" class="sf-sub" font-size="11">restore accepted</text>
+  <text x="588" y="338" text-anchor="middle" class="sf-sub" font-size="11">state <tspan class="sf-math">u</tspan><tspan dy="-4" font-size="9">n</tspan></text>
+  <text x="588" y="356" text-anchor="middle" class="sf-sub" font-size="11">reduce &#x394;t&#x2217;</text>
+
+  <!-- (A) Nonlinear solve -->
+  <rect x="30" y="20" width="440" height="76" rx="7" class="sf-box"/>
+  <text x="250" y="54" text-anchor="middle" class="sf-lbl" font-size="13">(A) Nonlinear solve</text>
+  <text x="250" y="74" text-anchor="middle" class="sf-sub" font-size="11">trial state from SNES / operator-split iteration</text>
+  <path d="M 250 96 V 112" class="sf-edge" marker-end="url(#f2-a)"/>
+
+  <!-- (B) Algebraic validity -->
+  <rect x="30" y="112" width="440" height="76" rx="7" class="sf-box"/>
+  <text x="250" y="146" text-anchor="middle" class="sf-lbl" font-size="13">(B) Algebraic validity</text>
+  <text x="250" y="166" text-anchor="middle" class="sf-sub" font-size="11">SNES/KSP divergence; outer-split defects <tspan class="sf-math">&#x03B4;</tspan><tspan dy="3" font-size="9">q</tspan><tspan dy="-3">, <tspan class="sf-math">&#x03B4;</tspan><tspan dy="3" font-size="9">&#x03C6;</tspan></tspan></text>
+  <path d="M 470 150 H 490" class="sf-edge-rej" marker-end="url(#f2-ar)"/>
+  <text x="474" y="144" class="sf-br" font-size="11">fail</text>
+  <path d="M 250 188 V 204" class="sf-edge" marker-end="url(#f2-a)"/>
+
+  <!-- (C) Atlas radius guard -->
+  <rect x="30" y="204" width="440" height="76" rx="7" class="sf-box"/>
+  <text x="250" y="238" text-anchor="middle" class="sf-lbl" font-size="13">(C) Atlas radius guard</text>
+  <text x="250" y="258" text-anchor="middle" class="sf-sub" font-size="11"><tspan class="sf-math">r</tspan><tspan dy="3" font-size="9">max</tspan><tspan dy="-3"> &#x2264; <tspan class="sf-math">g</tspan><tspan dy="3" font-size="9">hard</tspan><tspan dy="-3">;  re-checked after backtracking</tspan></tspan></text>
+  <path d="M 470 242 H 490" class="sf-edge-rej" marker-end="url(#f2-ar)"/>
+  <text x="474" y="236" class="sf-br" font-size="11">fail</text>
+  <path d="M 250 280 V 296" class="sf-edge" marker-end="url(#f2-a)"/>
+
+  <!-- (D) Residual gate -->
+  <rect x="30" y="296" width="440" height="100" rx="7" class="sf-box sf-ref"/>
+  <text x="250" y="333" text-anchor="middle" class="sf-lbl" font-size="13">(D) Residual gate</text>
+  <text x="250" y="354" text-anchor="middle" class="sf-sub" font-size="11">&#x2016;<tspan class="sf-math">F</tspan>&#x2016; &#x2264; <tspan class="sf-math">g</tspan><tspan dy="3" font-size="9">res</tspan><tspan dy="-3">  &#x2192;  substages D1&#x2013;D3 on failure</tspan></text>
+  <text x="250" y="374" text-anchor="middle" class="sf-sub" font-size="11">D3 does not reject  &#x2014;  see Figure 3</text>
+  <path d="M 250 396 V 412" class="sf-edge" marker-end="url(#f2-a)"/>
+
+  <!-- (E) Thermodynamic gate -->
+  <rect x="30" y="412" width="440" height="100" rx="7" class="sf-box sf-ref"/>
+  <text x="250" y="449" text-anchor="middle" class="sf-lbl" font-size="13">(E) Thermodynamic gate</text>
+  <text x="250" y="470" text-anchor="middle" class="sf-sub" font-size="11">&#x394;<tspan class="sf-math">E</tspan><tspan dy="3" font-size="9">gate</tspan><tspan dy="-3"> &#x2264; budget  &#x2192;  substage E1 on failure</tspan></text>
+  <text x="250" y="490" text-anchor="middle" class="sf-sub" font-size="11">inactive during ramps  &#x2014;  see Figure 4</text>
+  <path d="M 470 462 H 490" class="sf-edge-rej" marker-end="url(#f2-ar)"/>
+  <text x="474" y="456" class="sf-br" font-size="11">E1 fail</text>
+  <path d="M 250 512 V 528" class="sf-edge" marker-end="url(#f2-a)"/>
+
+  <!-- (F) Atlas closure -->
+  <rect x="30" y="528" width="440" height="76" rx="7" class="sf-box"/>
+  <text x="250" y="562" text-anchor="middle" class="sf-lbl" font-size="13">(F) Atlas closure</text>
+  <text x="250" y="582" text-anchor="middle" class="sf-sub" font-size="11">|&#x394;<tspan class="sf-math">E</tspan><tspan dy="3" font-size="9">closure</tspan><tspan dy="-3">| &#x2264; tolerance;  representation repair</tspan></text>
+  <path d="M 470 566 H 490" class="sf-edge-rej" marker-end="url(#f2-ar)"/>
+  <text x="474" y="560" class="sf-br" font-size="11">fail</text>
+  <path d="M 250 604 V 620" class="sf-edge" marker-end="url(#f2-a)"/>
+
+  <!-- Accept -->
+  <rect x="30" y="620" width="440" height="60" rx="7" class="sf-box sf-ok"/>
+  <text x="250" y="658" text-anchor="middle" class="sf-lbl" font-size="13">Accept attempt</text>
+
+</svg>
+</div>

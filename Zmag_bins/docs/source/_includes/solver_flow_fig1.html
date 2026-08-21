@@ -1,0 +1,132 @@
+<div class="solver-flow-svg solver-flow-svg--driver" role="img" aria-label="Timestep driver">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510 550">
+  <defs>
+    <marker id="f1-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-foreground-muted, #6b6f76)" stroke="none"/>
+    </marker>
+  </defs>
+
+  <!--
+    Canvas 510 × 548   cx-main = 200  (phase boxes x=50..350)
+
+    Badge pills x=358..402/402..446/446..490 (w=44, gap=4)
+    Colours: ok=sf-ok / fail=sf-fail / neutral=sf-box
+
+    y layout
+      Title bar     y=6..34
+      Preamble      y=50..96   (h=46)
+      Backup u^n    y=112..142 (h=30)
+      Loop border   y=156..444 (h=288, dashed — 8px pad below phase F bottom 430+6=436→444)
+        (A) y=202..230   badges: PASS
+        (B) y=242..270   badges: PASS RETRY REJECT
+        (C) y=282..310   badges: PASS WARN REJECT
+        (D) y=322..350   badges: PASS SOFT   (never rejects)
+        (E) y=362..390   badges: SKIP PASS REJECT
+        (F) y=402..430   badges: PASS WARN REJECT
+      Post-accept   y=452..498 (h=46)
+      Step advance  y=514..544 (h=30)
+  -->
+
+  <!-- Title bar -->
+  <rect x="10" y="6" width="490" height="28" rx="5" class="sf-box sf-accent"/>
+  <text x="255" y="25" text-anchor="middle" class="sf-lbl" font-size="13">Timestep driver  (step index <tspan class="sf-math">n</tspan>)</text>
+
+  <!-- Preamble -->
+  <path d="M 200 34 V 50" class="sf-edge" marker-end="url(#f1-a)"/>
+  <rect x="50" y="50" width="300" height="46" rx="5" class="sf-box"/>
+  <text x="200" y="70" text-anchor="middle" class="sf-lbl" font-size="13">Preamble</text>
+  <text x="200" y="87" text-anchor="middle" class="sf-sub" font-size="11">ramps · transition guards · magnetostatics</text>
+
+  <!-- Backup u^n -->
+  <path d="M 200 96 V 112" class="sf-edge" marker-end="url(#f1-a)"/>
+  <rect x="50" y="112" width="300" height="30" rx="5" class="sf-box"/>
+  <text x="200" y="132" text-anchor="middle" class="sf-lbl" font-size="13">Backup <tspan class="sf-math">u</tspan><tspan dy="-4" font-size="9">n</tspan></text>
+
+  <!-- Δt-retry loop border (dashed) — covers phase boxes + badges, bottom at y=444 -->
+  <!-- right edge: badges end at x=498, so width=490 → right at x=506; use x=16 w=488 → 504 -->
+  <path d="M 200 142 V 156" class="sf-edge" marker-end="url(#f1-a)"/>
+  <rect x="16" y="156" width="488" height="288" rx="6" class="sf-box sf-ref"/>
+  <text x="255" y="175" text-anchor="middle" class="sf-lbl" font-size="13">&#x394;t*-retry loop</text>
+  <text x="255" y="192" text-anchor="middle" class="sf-sub" font-size="11">fixed &#x394;t* per attempt · retry until accept or limit</text>
+
+  <!-- ── Phase (A) ── -->
+  <rect x="50" y="202" width="300" height="28" rx="4" class="sf-box sf-accent"/>
+  <text x="200" y="221" text-anchor="middle" class="sf-lbl" font-size="12">(A)  Nonlinear solve</text>
+  <path d="M 200 230 V 242" class="sf-edge" marker-end="url(#f1-a)"/>
+  <!-- badges -->
+  <rect x="358" y="205" width="44" height="20" rx="3" class="sf-box sf-ok"/>
+  <text x="380" y="219" text-anchor="middle" class="sf-ok-txt" font-size="10" font-weight="700">PASS</text>
+
+  <!-- ── Phase (B) ── -->
+  <rect x="50" y="242" width="300" height="28" rx="4" class="sf-box"/>
+  <text x="200" y="261" text-anchor="middle" class="sf-lbl" font-size="12">(B)  Algebraic validity</text>
+  <path d="M 200 270 V 282" class="sf-edge" marker-end="url(#f1-a)"/>
+  <!-- badges -->
+  <rect x="358" y="245" width="44" height="20" rx="3" class="sf-box sf-ok"/>
+  <text x="380" y="259" text-anchor="middle" class="sf-ok-txt" font-size="10" font-weight="700">PASS</text>
+  <rect x="406" y="245" width="44" height="20" rx="3" class="sf-box sf-ok"/>
+  <text x="428" y="259" text-anchor="middle" class="sf-ok-txt" font-size="10" font-weight="700">RETRY</text>
+  <rect x="454" y="245" width="44" height="20" rx="3" class="sf-box sf-fail"/>
+  <text x="476" y="259" text-anchor="middle" class="sf-rej-txt" font-size="10" font-weight="700">REJECT</text>
+
+  <!-- ── Phase (C) ── -->
+  <rect x="50" y="282" width="300" height="28" rx="4" class="sf-box"/>
+  <text x="200" y="301" text-anchor="middle" class="sf-lbl" font-size="12">(C)  Atlas radius guard + energies</text>
+  <path d="M 200 310 V 322" class="sf-edge" marker-end="url(#f1-a)"/>
+  <!-- badges -->
+  <rect x="358" y="285" width="44" height="20" rx="3" class="sf-box sf-ok"/>
+  <text x="380" y="299" text-anchor="middle" class="sf-ok-txt" font-size="10" font-weight="700">PASS</text>
+  <rect x="406" y="285" width="44" height="20" rx="3" class="sf-box"/>
+  <text x="428" y="299" text-anchor="middle" class="sf-warn-txt" font-size="10" font-weight="700">WARN</text>
+  <rect x="454" y="285" width="44" height="20" rx="3" class="sf-box sf-fail"/>
+  <text x="476" y="299" text-anchor="middle" class="sf-rej-txt" font-size="10" font-weight="700">REJECT</text>
+
+  <!-- ── Phase (D) ── -->
+  <rect x="50" y="322" width="300" height="28" rx="4" class="sf-box"/>
+  <text x="200" y="341" text-anchor="middle" class="sf-lbl" font-size="12">(D)  Residual gate</text>
+  <path d="M 200 350 V 362" class="sf-edge" marker-end="url(#f1-a)"/>
+  <!-- badges: D never raises RuntimeError — PASS or SOFT -->
+  <rect x="358" y="325" width="44" height="20" rx="3" class="sf-box sf-ok"/>
+  <text x="380" y="339" text-anchor="middle" class="sf-ok-txt" font-size="10" font-weight="700">PASS</text>
+  <rect x="406" y="325" width="44" height="20" rx="3" class="sf-box"/>
+  <text x="428" y="339" text-anchor="middle" class="sf-warn-txt" font-size="10" font-weight="700">SOFT</text>
+
+  <!-- ── Phase (E) ── -->
+  <rect x="50" y="362" width="300" height="28" rx="4" class="sf-box"/>
+  <text x="200" y="381" text-anchor="middle" class="sf-lbl" font-size="12">(E)  Thermodynamic gate</text>
+  <path d="M 200 390 V 402" class="sf-edge" marker-end="url(#f1-a)"/>
+  <!-- badges -->
+  <rect x="358" y="365" width="44" height="20" rx="3" class="sf-box sf-ok"/>
+  <text x="380" y="379" text-anchor="middle" class="sf-ok-txt" font-size="10" font-weight="700">SKIP</text>
+  <rect x="406" y="365" width="44" height="20" rx="3" class="sf-box sf-ok"/>
+  <text x="428" y="379" text-anchor="middle" class="sf-ok-txt" font-size="10" font-weight="700">PASS</text>
+  <rect x="454" y="365" width="44" height="20" rx="3" class="sf-box sf-fail"/>
+  <text x="476" y="379" text-anchor="middle" class="sf-rej-txt" font-size="10" font-weight="700">REJECT</text>
+
+  <!-- ── Phase (F) ── -->
+  <rect x="50" y="402" width="300" height="28" rx="4" class="sf-box"/>
+  <text x="200" y="421" text-anchor="middle" class="sf-lbl" font-size="12">(F)  Atlas closure</text>
+  <!-- badges -->
+  <rect x="358" y="405" width="44" height="20" rx="3" class="sf-box sf-ok"/>
+  <text x="380" y="419" text-anchor="middle" class="sf-ok-txt" font-size="10" font-weight="700">PASS</text>
+  <rect x="406" y="405" width="44" height="20" rx="3" class="sf-box"/>
+  <text x="428" y="419" text-anchor="middle" class="sf-warn-txt" font-size="10" font-weight="700">WARN</text>
+  <rect x="454" y="405" width="44" height="20" rx="3" class="sf-box sf-fail"/>
+  <text x="476" y="419" text-anchor="middle" class="sf-rej-txt" font-size="10" font-weight="700">REJECT</text>
+
+  <!-- Accept exit — longer arrow so it's clearly visible -->
+  <path d="M 200 444 V 464" class="sf-edge" marker-end="url(#f1-a)"/>
+  <text x="208" y="460" class="sf-br" font-size="10">accept</text>
+
+  <!-- Post-accept update -->
+  <rect x="50" y="464" width="300" height="46" rx="5" class="sf-box sf-ok"/>
+  <text x="200" y="484" text-anchor="middle" class="sf-lbl" font-size="13">Post-accept update</text>
+  <text x="200" y="501" text-anchor="middle" class="sf-sub" font-size="11">advance <tspan class="sf-math">t</tspan> · BDF history · next &#x394;t*</text>
+
+  <!-- Step advance -->
+  <path d="M 200 510 V 520" class="sf-edge" marker-end="url(#f1-a)"/>
+  <rect x="50" y="520" width="300" height="28" rx="5" class="sf-box"/>
+  <text x="200" y="539" text-anchor="middle" class="sf-lbl" font-size="12"><tspan class="sf-math">n</tspan> &#x2190; <tspan class="sf-math">n</tspan>+1  or  steady-state stop</text>
+
+</svg>
+</div>

@@ -1,0 +1,92 @@
+<div class="solver-flow-svg solver-flow-svg--detail" role="img" aria-label="Phase E substages">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 614">
+  <defs>
+    <marker id="f4-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,5 0,10" style="fill: var(--color-foreground-muted, #6b6f76); stroke: none;"/>
+    </marker>
+    <marker id="f4-ar" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,5 0,10" style="fill: var(--color-admonition-title--danger, #ff5252); stroke: none;"/>
+    </marker>
+  </defs>
+
+  <!--
+    Main column:  cx=240, box x=80..400 (w=320)
+    E1 column:    cx=540, box x=460..630 (w=170)
+    Reject box:   cx=540, x=460..630     y=146..254
+
+    y layout:
+      "Thermo active?" diamond:  cy=52   (10..94)   half-w=110 → tips 130,350
+      "Thermo inequality" box:   y=110..186  (h=76, 2 lines)
+      "Satisfied?" diamond:      cy=240  (204..276)  half-w=110 → tips 130,350
+      "E1: λ-line" box:          cx=540  y=304..378  (h=74, 2 lines)
+      "λ found?" diamond:        cy=428  (396..460)  cx=540 half-w=70 → tips 470,610
+      Reject box:                cx=540  y=146..254  (h=108)
+      "Proceed to (F)" box:      cx=240  y=500..558
+      Note bar:                  y=580..600
+  -->
+
+  <!-- "Thermo active?" diamond cy=52 -->
+  <polygon points="240,10 350,52 240,94 130,52" class="sf-diamond"/>
+  <text x="240" y="50" text-anchor="middle" class="sf-lbl" font-size="13">Thermo active?</text>
+  <text x="240" y="70" text-anchor="middle" class="sf-sub" font-size="11">off during ramp / reconcile</text>
+
+  <!-- NO: left skip lane → proceed box -->
+  <path d="M 130 52 H 60 V 529 H 80" class="sf-edge" marker-end="url(#f4-a)"/>
+  <text x="64" y="46" class="sf-br" font-size="11">no</text>
+
+  <!-- YES: down to thermo inequality box -->
+  <path d="M 240 94 V 110" class="sf-edge" marker-end="url(#f4-a)"/>
+  <text x="247" y="106" class="sf-br" font-size="11">yes</text>
+
+  <!-- Thermodynamic inequality (h=76, 2 lines) -->
+  <rect x="80" y="110" width="320" height="76" rx="6" class="sf-box"/>
+  <text x="240" y="144" text-anchor="middle" class="sf-lbl" font-size="13">Thermodynamic inequality</text>
+  <text x="240" y="168" text-anchor="middle" class="sf-sub" font-size="11">&#x394;<tspan class="sf-math">E</tspan><tspan dy="3" font-size="8">gate</tspan><tspan dy="-3"> &#x2264; max(0, &#x2212;</tspan><tspan class="sf-math">W</tspan><tspan dy="3" font-size="8">ext</tspan><tspan dy="-3">) + budget</tspan></text>
+  <path d="M 240 186 V 204" class="sf-edge" marker-end="url(#f4-a)"/>
+
+  <!-- "Satisfied?" diamond cy=240 -->
+  <polygon points="240,204 350,240 240,276 130,240" class="sf-diamond"/>
+  <text x="240" y="244" text-anchor="middle" class="sf-sub" font-size="11">satisfied?</text>
+
+  <!-- YES → down to proceed -->
+  <path d="M 240 276 V 500" class="sf-edge" marker-end="url(#f4-a)"/>
+  <text x="247" y="294" class="sf-br" font-size="11">yes</text>
+
+  <!-- NO → right to E1 column -->
+  <path d="M 350 240 H 420 V 304 H 460" class="sf-edge" marker-end="url(#f4-a)"/>
+  <text x="356" y="234" class="sf-br" font-size="11">no</text>
+
+  <!-- E1: λ-line search (h=74, 2 lines) -->
+  <rect x="460" y="304" width="170" height="74" rx="6" class="sf-box sf-accent"/>
+  <text x="545" y="336" text-anchor="middle" class="sf-lbl" font-size="13">E1: <tspan class="sf-math">&#x03BB;</tspan>-line</text>
+  <text x="545" y="357" text-anchor="middle" class="sf-sub" font-size="11">thermo + residual</text>
+  <path d="M 545 378 V 396" class="sf-edge" marker-end="url(#f4-a)"/>
+
+  <!-- "λ found?" diamond cy=428, cx=545, half-w=70 → tips 475,615 -->
+  <polygon points="545,396 615,428 545,460 475,428" class="sf-diamond"/>
+  <text x="545" y="432" text-anchor="middle" class="sf-sub" font-size="11"><tspan class="sf-math">&#x03BB;</tspan> found?</text>
+
+  <!-- YES → down then left to proceed -->
+  <path d="M 545 460 V 529 H 400" class="sf-edge" marker-end="url(#f4-a)"/>
+  <text x="551" y="475" class="sf-br" font-size="11">yes</text>
+
+  <!-- NO → right → up → into reject box bottom -->
+  <path d="M 615 428 H 650 V 264 H 630 V 254" class="sf-edge-rej" marker-end="url(#f4-ar)"/>
+  <text x="619" y="422" class="sf-br" font-size="11">no</text>
+
+  <!-- Reject box: cx=545, y=146..254 (h=108) -->
+  <rect x="460" y="146" width="170" height="108" rx="6" class="sf-box sf-fail"/>
+  <text x="545" y="182" text-anchor="middle" class="sf-lbl" font-size="13">Reject</text>
+  <text x="545" y="202" text-anchor="middle" class="sf-sub" font-size="11">E1 failure</text>
+  <text x="545" y="222" text-anchor="middle" class="sf-sub" font-size="11">restore <tspan class="sf-math">u</tspan><tspan dy="-4" font-size="8">n</tspan><tspan dy="4">, reduce &#x394;t&#x2217;</tspan></text>
+
+  <!-- Proceed to phase (F) -->
+  <rect x="80" y="500" width="320" height="58" rx="6" class="sf-box sf-ok"/>
+  <text x="240" y="535" text-anchor="middle" class="sf-lbl" font-size="13">Proceed to phase (F)</text>
+
+  <!-- Note bar at bottom -->
+  <rect x="30" y="576" width="620" height="24" rx="5" class="sf-box sf-accent"/>
+  <text x="340" y="592" text-anchor="middle" class="sf-sub" font-size="10">E1 trials must satisfy both thermodynamic and residual gates simultaneously</text>
+
+</svg>
+</div>

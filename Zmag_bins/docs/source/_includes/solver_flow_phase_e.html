@@ -1,0 +1,235 @@
+<div class="solver-flow-svg solver-flow-svg--phase" role="img" aria-label="Phase E — Thermodynamic gate">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 760">
+  <defs>
+    <marker id="pe-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-foreground-muted, #6b6f76)" stroke="none"/>
+    </marker>
+    <marker id="pe-r" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-admonition-title--danger, #ff5252)" stroke="none"/>
+    </marker>
+  </defs>
+
+  <!--
+    viewBox 580 × 760    cx-spine = 230   (matches phases B/C/D)
+    Spine boxes   x=30..390  w=360
+    Spine diamonds  half-w=110  left-tip=120  right-tip=340  ONE label each
+
+    Right column:
+      E1 box      x=340..510  w=170
+      E1 λ diam   cx=425  half-w=70  tips=355..495
+      REJECT pill x=497  w=60  h=26  right-edge=557  (within 580)
+        arrow: right-tip (495,cy) → H497  marker-end pe-r
+
+    Left bypass bus  x=14:
+      Gate=no   (120,72)  → H14 ↓ shaft
+      Phys=off  (120,392) → H14 ↓ (joins bus, merge dot at y=392)
+      Shaft descends to y=716; then H60 → Proceed box left edge
+
+    y layout  (all inter-element arrows ≥ 18 px)
+      Title            6..34    h=28
+      ↓20              34→54
+      Gate active ◇    top=54  cy=74  bot=94   half-w=110
+      ↓20              94→114
+      Thermo box       114..182  h=68
+      ↓20              182→202
+      ΔE_gate ◇        top=202  cy=222  bot=242  half-w=110
+        no  → (340,222) H360 V268 → E1 box top
+        yes ↓ (230,242) shaft to merge-dot (230,352)
+      ↓18 gap between diamond bot and E1 box: 242→260 right-side elbow goes to 268
+      E1 box           268..320  h=52
+      ↓18              320→338
+      E1 λ ◇           cx=425  top=338  cy=358  bot=378  half-w=70
+        yes ← (355,358) H230  merge-dot (230,358) on spine shaft
+        no  → (495,358) H497  REJECT pill
+      merge-dot        (230,358)  [spine shaft passes through; E1 yes lands here]
+      ↓18              358→376   (shaft continues from merge-dot to 376, then arrow to diam)
+      Wait — spine shaft goes 242→352 (no arrowhead), merge-dot at 352; then arrow 352→370 → Phys ◇
+      Adjust: merge-dot at (230,352) [midway between E1 λ=yes arrival and Phys diam top]
+        E1 λ ◇  cy=338, bot=356  →  yes ← H230 → merge-dot (230,352)  [lands on shaft 242→352]
+        after merge-dot: ↓18 → arrow 352→370 → Phys ◇
+
+      Revised y layout — spine-side diamonds half-h=22  (half-w=110):
+      Title            6..34
+      ↓20              34→54
+      Gate ◇           top=54   cy=76   bot=98    (half-h=22)
+      ↓20              98→118
+      Thermo box       118..186  h=68
+      ↓20              186→206
+      ΔE_gate ◇        top=206  cy=228  bot=250   (half-h=22)
+        no  → (340,228) H360 V274 → E1 box
+        yes ↓ shaft (230,250) to merge-dot (230,358)
+      E1 box           274..326  h=52
+      ↓18              326→344
+      E1 λ ◇           cx=425  top=344  cy=358  bot=372  half-w=70  half-h=14
+        yes ← (355,358) H230 → lands on spine shaft → merge-dot (230,358)
+        no  → (495,358) REJECT
+      merge-dot        (230,358)
+      spine shaft      (230,250)→(230,358)  no arrowhead
+      ↓20              358→378 arrow with head → Phys ◇
+      Phys guard ◇     top=378  cy=400  bot=422  half-w=110  (half-h=22)
+        off → H14 bus (joins left bus; merge-dot at (14,400))
+        on  ↓ arrow 422→442 → ΔE_phys box
+      ΔE_phys box      442..494  h=52
+      ↓20              494→514
+      ΔE_phys ◇        top=514  cy=536  bot=558  half-w=110  (half-h=22)
+        no  → (340,536) H360 V582 → E1p box
+        yes ↓ shaft (230,558) to merge-dot (230,666)
+      E1p box          582..634  h=52
+      ↓18              634→652
+      E1p λ ◇          cx=425  top=652  cy=666  bot=680  half-w=70  half-h=14
+        yes ← (355,666) H230 → merge-dot (230,666)  on spine shaft
+        no  → (495,666) REJECT
+      merge-dot        (230,666)
+      spine shaft      (230,558)→(230,666)  no arrowhead
+      ↓20              666→686 arrow → Proceed box
+      Proceed (F)      686..724  h=38
+
+      Left bus shaft   x=14:  (120,76) H14 V716  (below Proceed bot 724)
+        merge at (14,400) — merge-dot
+        arrowhead: H60 at y=686 → Proceed left edge
+
+    viewBox height = 730
+  -->
+
+  <!-- Title bar -->
+  <rect x="10" y="6" width="560" height="28" rx="5" class="sf-box sf-accent"/>
+  <text x="290" y="25" text-anchor="middle" class="sf-lbl" font-size="13">(E) Thermodynamic gate — E1  (<tspan class="sf-tt" font-size="11">_apply_thermodynamic_gate</tspan>)</text>
+
+  <!-- ↓ Title → Gate active? -->
+  <path d="M 230 34 V 54" class="sf-edge" marker-end="url(#pe-a)"/>
+
+  <!-- Gate active?  cy=76  half-w=110  half-h=22 -->
+  <polygon points="230,54 340,76 230,98 120,76" class="sf-diamond"/>
+  <text x="230" y="80" text-anchor="middle" class="sf-lbl" font-size="12">Gate active?</text>
+
+  <!-- Gate=no → left bus (shaft drawn at bottom) -->
+  <text x="18" y="70" class="sf-br" font-size="10">no</text>
+  <text x="18" y="82" class="sf-sub" font-size="9">ramp/reconcile</text>
+
+  <!-- Gate=yes ↓ Thermo box -->
+  <path d="M 230 98 V 118" class="sf-edge" marker-end="url(#pe-a)"/>
+  <text x="237" y="114" class="sf-br" font-size="10">yes</text>
+
+  <!-- Thermo box  y=118..186  h=68 -->
+  <rect x="30" y="118" width="360" height="68" rx="5" class="sf-box"/>
+  <text x="210" y="142" text-anchor="middle" class="sf-lbl" font-size="13">Thermodynamic inequality</text>
+  <text x="210" y="162" text-anchor="middle" class="sf-sub" font-size="11">&#x394;<tspan class="sf-math">E</tspan><tspan dy="3" font-size="8">gate</tspan><tspan dy="-3"> &#x2264; max(0, &#x2212;<tspan class="sf-math">W</tspan><tspan dy="3" font-size="8">ext</tspan><tspan dy="-3">) + <tspan class="sf-math">B</tspan></tspan></text>
+  <text x="210" y="179" text-anchor="middle" class="sf-sub" font-size="10"><tspan class="sf-math">B</tspan> = <tspan class="sf-math">B</tspan><tspan dy="3" font-size="7">fp</tspan><tspan dy="-3"> + &#x394;t&#x2016;<tspan class="sf-math">F</tspan>&#x2016; + &#x03B7;&#x00B7;EMA + <tspan class="sf-math">B</tspan><tspan dy="3" font-size="7">dem</tspan></tspan></text>
+
+  <!-- ↓ Thermo box → ΔE_gate ◇ -->
+  <path d="M 230 186 V 206" class="sf-edge" marker-end="url(#pe-a)"/>
+
+  <!-- ΔE_gate?  cy=228  half-w=110  half-h=22 -->
+  <polygon points="230,206 340,228 230,250 120,228" class="sf-diamond"/>
+  <text x="230" y="232" text-anchor="middle" class="sf-lbl" font-size="12">&#x394;<tspan class="sf-math">E</tspan><tspan dy="3" font-size="8">gate</tspan><tspan dy="-3"> satisfied?</tspan></text>
+
+  <!-- ΔE_gate=no → right elbow → E1 box -->
+  <path d="M 340 228 H 360 V 274" class="sf-edge" marker-end="url(#pe-a)"/>
+  <text x="343" y="222" class="sf-br" font-size="10">no</text>
+
+  <!-- ΔE_gate=yes ↓ spine shaft to merge-dot (230,358) — no arrowhead on shaft -->
+  <path d="M 230 250 V 358" class="sf-edge"/>
+  <text x="237" y="266" class="sf-br" font-size="10">yes</text>
+
+  <!-- E1 box  x=340..510  y=274..326  h=52 -->
+  <rect x="340" y="274" width="170" height="52" rx="5" class="sf-box sf-accent"/>
+  <text x="425" y="296" text-anchor="middle" class="sf-lbl" font-size="13">E1: chord search</text>
+  <text x="425" y="314" text-anchor="middle" class="sf-sub" font-size="11">thermo + residual gates</text>
+
+  <!-- ↓ E1 box → E1 λ ◇ -->
+  <path d="M 425 326 V 344" class="sf-edge" marker-end="url(#pe-a)"/>
+
+  <!-- E1 λ?  cx=425  top=344  cy=358  bot=372  half-w=70  half-h=14 -->
+  <polygon points="425,344 495,358 425,372 355,358" class="sf-diamond"/>
+  <text x="425" y="362" text-anchor="middle" class="sf-lbl" font-size="12"><tspan class="sf-math">&#x03BB;</tspan> found?</text>
+
+  <!-- E1 λ=no → REJECT -->
+  <path d="M 495 358 H 515" class="sf-edge-rej" marker-end="url(#pe-r)"/>
+  <text x="497" y="352" class="sf-br" font-size="10">no</text>
+  <rect x="517" y="345" width="60" height="26" rx="3" class="sf-box sf-fail"/>
+  <text x="547" y="363" text-anchor="middle" class="sf-rej-txt" font-size="11" font-weight="700">REJECT</text>
+
+  <!-- E1 λ=yes ← to spine, lands on spine shaft at (230,358) -->
+  <path d="M 355 358 H 230" class="sf-edge" marker-end="url(#pe-a)"/>
+  <text x="310" y="352" class="sf-br" font-size="10">yes</text>
+
+  <!-- Merge-dot where ΔE_gate=yes shaft meets E1 λ=yes return -->
+  <circle cx="230" cy="358" r="4" fill="var(--color-foreground-muted,#6b6f76)"/>
+
+  <!-- ↓ merge-dot → Phys guard ◇ -->
+  <path d="M 230 358 V 378" class="sf-edge" marker-end="url(#pe-a)"/>
+
+  <!-- Phys guard?  cy=400  half-w=110  half-h=22 -->
+  <polygon points="230,378 340,400 230,422 120,400" class="sf-diamond"/>
+  <text x="230" y="404" text-anchor="middle" class="sf-lbl" font-size="12">Physical guard?</text>
+
+  <!-- Phys=off → left bus (shaft drawn at bottom; merge-dot at (14,400)) -->
+  <path d="M 120 400 H 14" class="sf-edge"/>
+  <text x="18" y="394" class="sf-br" font-size="10">off</text>
+
+  <!-- Phys=on ↓ ΔE_phys box -->
+  <path d="M 230 422 V 442" class="sf-edge" marker-end="url(#pe-a)"/>
+  <text x="237" y="438" class="sf-br" font-size="10">on</text>
+
+  <!-- ΔE_phys box  y=442..494  h=52 -->
+  <rect x="30" y="442" width="360" height="52" rx="5" class="sf-box"/>
+  <text x="210" y="464" text-anchor="middle" class="sf-lbl" font-size="13">Physical energy guard</text>
+  <text x="210" y="482" text-anchor="middle" class="sf-sub" font-size="11">&#x394;<tspan class="sf-math">E</tspan><tspan dy="3" font-size="8">phys</tspan><tspan dy="-3"> &#x2264; allowed  (budget + rel./EMA floors)</tspan></text>
+
+  <!-- ↓ ΔE_phys box → ΔE_phys ◇ -->
+  <path d="M 230 494 V 514" class="sf-edge" marker-end="url(#pe-a)"/>
+
+  <!-- ΔE_phys?  cy=536  half-w=110  half-h=22 -->
+  <polygon points="230,514 340,536 230,558 120,536" class="sf-diamond"/>
+  <text x="230" y="540" text-anchor="middle" class="sf-lbl" font-size="12">satisfied?</text>
+
+  <!-- ΔE_phys=no → right elbow → E1p box -->
+  <path d="M 340 536 H 360 V 582" class="sf-edge" marker-end="url(#pe-a)"/>
+  <text x="343" y="530" class="sf-br" font-size="10">no</text>
+
+  <!-- ΔE_phys=yes ↓ spine shaft to merge-dot (230,666) — no arrowhead on shaft -->
+  <path d="M 230 558 V 666" class="sf-edge"/>
+  <text x="237" y="574" class="sf-br" font-size="10">yes</text>
+
+  <!-- E1p box  x=340..510  y=582..634  h=52 -->
+  <rect x="340" y="582" width="170" height="52" rx="5" class="sf-box sf-accent"/>
+  <text x="425" y="604" text-anchor="middle" class="sf-lbl" font-size="13">E1: chord search</text>
+  <text x="425" y="622" text-anchor="middle" class="sf-sub" font-size="11">physical guard active</text>
+
+  <!-- ↓ E1p box → E1p λ ◇ -->
+  <path d="M 425 634 V 652" class="sf-edge" marker-end="url(#pe-a)"/>
+
+  <!-- E1p λ?  cx=425  top=652  cy=666  bot=680  half-w=70  half-h=14 -->
+  <polygon points="425,652 495,666 425,680 355,666" class="sf-diamond"/>
+  <text x="425" y="670" text-anchor="middle" class="sf-lbl" font-size="12"><tspan class="sf-math">&#x03BB;</tspan> found?</text>
+
+  <!-- E1p λ=no → REJECT -->
+  <path d="M 495 666 H 515" class="sf-edge-rej" marker-end="url(#pe-r)"/>
+  <text x="497" y="660" class="sf-br" font-size="10">no</text>
+  <rect x="517" y="653" width="60" height="26" rx="3" class="sf-box sf-fail"/>
+  <text x="547" y="671" text-anchor="middle" class="sf-rej-txt" font-size="11" font-weight="700">REJECT</text>
+
+  <!-- E1p λ=yes ← to spine, lands on spine shaft at (230,666) -->
+  <path d="M 355 666 H 230" class="sf-edge" marker-end="url(#pe-a)"/>
+  <text x="310" y="660" class="sf-br" font-size="10">yes</text>
+
+  <!-- Merge-dot where ΔE_phys=yes shaft meets E1p λ=yes return -->
+  <circle cx="230" cy="666" r="4" fill="var(--color-foreground-muted,#6b6f76)"/>
+
+  <!-- ↓ merge-dot → Proceed -->
+  <path d="M 230 666 V 686" class="sf-edge" marker-end="url(#pe-a)"/>
+
+  <!-- Proceed to (F)  y=686..724  h=38 -->
+  <rect x="80" y="686" width="300" height="38" rx="5" class="sf-box sf-ok"/>
+  <text x="230" y="710" text-anchor="middle" class="sf-lbl" font-size="13">Proceed to (F)</text>
+
+  <!-- ══ LEFT BUS ══
+       Gate=no  (120,76) → H14 → shaft down to y=686
+       Phys=off (120,400) → H14 (joins bus; merge-dot at (14,400))
+       Bottom: H 80 → Proceed box left edge (80,686)  with arrowhead -->
+  <path d="M 120 76 H 14 V 686" class="sf-edge"/>
+  <path d="M 14 686 H 80" class="sf-edge" marker-end="url(#pe-a)"/>
+  <circle cx="14" cy="400" r="4" fill="var(--color-foreground-muted,#6b6f76)"/>
+
+</svg>
+</div>

@@ -1,0 +1,108 @@
+<div class="solver-flow-svg solver-flow-svg--phase" role="img" aria-label="Phase A — Nonlinear solve">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 506">
+  <defs>
+    <marker id="pa-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-foreground-muted, #6b6f76)" stroke="none"/>
+    </marker>
+  </defs>
+
+  <!--
+    Canvas 560 × 506   cx = 280
+    Phase boxes: x=80..480 (w=400)   Loop border: x=16..544 (w=528)
+    All inter-box gaps = 14 px.
+
+    y layout
+      Title         y=6..34    h=28
+      ↓14  arrow    34→48
+      BDF shift     y=48..80   h=32
+      ↓14  arrow    80→94
+      ┌─ Loop border y=94..408  h=314 ───────────────────────────────
+      │ label row   94..118    (24px)
+      │ ↓14  arrow  118→132
+      │ Atlas upd   132..164   h=32
+      │ ↓14  arrow  164→178
+      │ Freeze φ    178..222   h=44
+      │ ↓14  arrow  222→236
+      │ SNES solve  236..280   h=44
+      │ ↓14  arrow  280→294
+      │ Defects     294..326   h=32
+      │ ↓14  arrow  326→340
+      │ Diamond     top=340 cy=364 half-w=120 half-h=24 bot=388
+      │ ↓20 "yes"   388→408   (exits loop at border bottom)
+      └─────────────────────────────────────────────────────────────
+      ↓14  arrow    408→422
+      Store trial   422..454   h=32
+      ↓14  arrow    454→468
+      Proceed (B)   468..500   h=32   (sf-ok, terminal)
+      viewBox bottom = 506
+
+    "no" arc:  right diamond tip (400,364) → H 514 → V 132 → H 480
+    Anderson text: rotated 90° at x=530 (16px from arc at 514, 14px from border at 544)
+  -->
+
+  <!-- Title bar -->
+  <rect x="10" y="6" width="540" height="28" rx="5" class="sf-box sf-accent"/>
+  <text x="280" y="25" text-anchor="middle" class="sf-lbl" font-size="13">(A) Nonlinear solve — <tspan class="sf-tt" font-size="11">_run_nonlinear_solve</tspan></text>
+
+  <!-- BDF history shift -->
+  <path d="M 280 34 V 48" class="sf-edge" marker-end="url(#pa-a)"/>
+  <rect x="80" y="48" width="400" height="32" rx="5" class="sf-box"/>
+  <text x="280" y="69" text-anchor="middle" class="sf-lbl" font-size="13">Shift BDF history · update BDF coefficients</text>
+
+  <!-- Outer fixed-point loop border (dashed) -->
+  <path d="M 280 80 V 94" class="sf-edge" marker-end="url(#pa-a)"/>
+  <rect x="16" y="94" width="528" height="314" rx="6" class="sf-box sf-ref"/>
+  <text x="280" y="113" text-anchor="middle" class="sf-lbl" font-size="13">Outer fixed-point loop  <tspan class="sf-math">k</tspan> = 0, 1, …</text>
+
+  <!-- Step 1: Atlas update -->
+  <path d="M 280 118 V 132" class="sf-edge" marker-end="url(#pa-a)"/>
+  <rect x="80" y="132" width="400" height="32" rx="5" class="sf-box"/>
+  <text x="280" y="153" text-anchor="middle" class="sf-lbl" font-size="13">Atlas update — rebuild weights <tspan class="sf-math">w</tspan><tspan dy="3" font-size="9">A</tspan><tspan dy="-3">, </tspan><tspan class="sf-math">w</tspan><tspan dy="3" font-size="9">B</tspan><tspan dy="-3"> from current <tspan class="sf-math">q</tspan></tspan></text>
+
+  <!-- Step 2: Freeze magnetostatics snapshot -->
+  <path d="M 280 164 V 178" class="sf-edge" marker-end="url(#pa-a)"/>
+  <rect x="80" y="178" width="400" height="44" rx="5" class="sf-box"/>
+  <text x="280" y="199" text-anchor="middle" class="sf-lbl" font-size="13">Freeze magnetostatics snapshot</text>
+  <text x="280" y="215" text-anchor="middle" class="sf-sub" font-size="11">Demag: BEM solve → <tspan class="sf-math">&#x03C6;</tspan><tspan dy="3" font-size="8">BEM</tspan><tspan dy="-3"><tspan dy="3" font-size="8"> k</tspan><tspan dy="-3"> stored as </tspan></tspan><tspan class="sf-tt" font-size="10">phi_outer_ref</tspan>  ·  Nodemag: skipped</text>
+
+  <!-- Step 3: SNES inner solve -->
+  <path d="M 280 222 V 236" class="sf-edge" marker-end="url(#pa-a)"/>
+  <rect x="80" y="236" width="400" height="44" rx="5" class="sf-box sf-accent"/>
+  <text x="280" y="257" text-anchor="middle" class="sf-lbl" font-size="13">SNES inner solve</text>
+  <text x="280" y="273" text-anchor="middle" class="sf-sub" font-size="11">Demag: <tspan class="sf-math">F</tspan>(<tspan class="sf-math">q</tspan><tspan dy="3" font-size="8">A</tspan><tspan dy="-3">,</tspan><tspan class="sf-math">q</tspan><tspan dy="3" font-size="8">B</tspan><tspan dy="-3">,</tspan><tspan class="sf-math">&#x03C6;</tspan>)=0  ·  Nodemag: <tspan class="sf-math">F</tspan>(<tspan class="sf-math">q</tspan><tspan dy="3" font-size="8">A</tspan><tspan dy="-3">,</tspan><tspan class="sf-math">q</tspan><tspan dy="3" font-size="8">B</tspan><tspan dy="-3">)=0</tspan></text>
+
+  <!-- Step 4: Compute defects -->
+  <path d="M 280 280 V 294" class="sf-edge" marker-end="url(#pa-a)"/>
+  <rect x="80" y="294" width="400" height="32" rx="5" class="sf-box"/>
+  <text x="280" y="315" text-anchor="middle" class="sf-lbl" font-size="13">Compute defects <tspan class="sf-math">&#x03B4;</tspan><tspan dy="3" font-size="9">q</tspan><tspan dy="-3">, </tspan><tspan class="sf-math">&#x03B4;</tspan><tspan dy="3" font-size="9">&#x03C6;</tspan><tspan dy="-3">  ·  re-evaluate BEM closure (demag)</tspan></text>
+
+  <!-- Convergence diamond: top=340 cy=364 half-w=120 half-h=24 bot=388 -->
+  <path d="M 280 326 V 340" class="sf-edge" marker-end="url(#pa-a)"/>
+  <polygon points="280,340 400,364 280,388 160,364" class="sf-diamond"/>
+  <text x="280" y="368" text-anchor="middle" class="sf-lbl" font-size="11">converged + min iters met?</text>
+
+  <!-- YES: down through loop border bottom (y=408), no arrowhead inside loop -->
+  <path d="M 280 388 V 408" class="sf-edge"/>
+  <text x="288" y="402" class="sf-br" font-size="10">yes</text>
+
+  <!-- NO arc: right diamond tip → rail at x=514 → up to y=132 → left to atlas right edge (x=480)
+       Anderson label rotated at x=530, centred on the vertical segment mid-point y=(132+364)/2=248 -->
+  <path d="M 400 364 H 514 V 132 H 480" class="sf-edge" marker-end="url(#pa-a)"/>
+  <text x="404" y="358" class="sf-br" font-size="10">no</text>
+  <text x="522" y="248" text-anchor="middle" class="sf-sub" font-size="10"
+        transform="rotate(90, 522, 248)">Anderson acceleration (if enabled)  ·  k ← k+1</text>
+
+  <!-- Exit loop: arrow from loop bottom to Store trial -->
+  <path d="M 280 408 V 422" class="sf-edge" marker-end="url(#pa-a)"/>
+
+  <!-- Store trial + blend m + residual snapshot -->
+  <rect x="80" y="422" width="400" height="32" rx="5" class="sf-box"/>
+  <text x="280" y="443" text-anchor="middle" class="sf-lbl" font-size="13">Store trial <tspan class="sf-math">q</tspan><tspan dy="3" font-size="9">A</tspan><tspan dy="-3">, </tspan><tspan class="sf-math">q</tspan><tspan dy="3" font-size="9">B</tspan><tspan dy="-3">  ·  blend <tspan class="sf-math">m</tspan>  ·  snapshot <tspan class="sf-math">&#x2016;F&#x2016;</tspan></tspan></text>
+
+  <!-- Proceed to (B) -->
+  <path d="M 280 454 V 468" class="sf-edge" marker-end="url(#pa-a)"/>
+  <rect x="130" y="468" width="300" height="32" rx="5" class="sf-box sf-ok"/>
+  <text x="280" y="489" text-anchor="middle" class="sf-lbl" font-size="13">Proceed to (B) — trial state ready</text>
+
+</svg>
+</div>

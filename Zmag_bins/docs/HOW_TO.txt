@@ -1,0 +1,56 @@
+Z-mag Sphinx documentation
+============================
+
+Location: Zmag_bins/docs/
+
+Self-contained manual: getting started, theory, API reference, bibliography.
+Published HTML: https://ibm.github.io/Z-mag/
+
+Build
+-----
+
+  cd Zmag_bins/docs
+  python -m venv .venv && source .venv/bin/activate
+  pip install -r requirements.txt
+  make clean html
+
+View (HTTP required for MathJax and flowcharts)
+----------------------------------------------
+
+Do not open build/html/*.html as file:// — MathJax and SVG figures need HTTP.
+
+Static build:
+
+  cd Zmag_bins/docs
+  pip install -r requirements.txt
+  make html
+  cd build/html && python -m http.server 8765 --bind 127.0.0.1
+
+Live rebuild while editing (recommended):
+
+  cd Zmag_bins/docs
+  pip install -r requirements.txt
+  ./serve.sh
+
+Open http://127.0.0.1:8765/ . If the build runs on a remote host, forward the port:
+
+  ssh -L 8765:127.0.0.1:8765 USER@HOST
+
+Document map
+------------
+
+  index.rst              — project introduction
+  overview.rst           — architecture and variants
+  installation.rst       — environment and BEM
+  getting_started.rst    — minimal driver example
+  theory_llg.rst         — LLG background
+  theory_energy.rst      — energy + nondimensional derivation
+  theory_magnetostatics.rst — FEM–BEM magnetostatics
+  theory_dynamics.rst    — LLG, weak form, nondimensionalization
+  theory_algorithms.rst  — BDF, CFL, thermo gates, outer split
+  theory_benchmarks.rst  — precession–damping, Standard Problem 3, checkpoint chain
+  config.rst             — simulation dictionaries
+  api_*.rst              — autodoc API
+  zreferences.rst        — bibliography
+
+Runtime dependencies: see the repository-root environment.yml

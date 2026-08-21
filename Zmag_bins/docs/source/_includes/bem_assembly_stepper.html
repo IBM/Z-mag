@@ -1,0 +1,305 @@
+<div class="bem-stepper" id="bem-asm-stepper" role="region" aria-label="BEM distributed assembly">
+  <h4>BEM: distributed assembly &amp; matrix&ndash;vector product</h4>
+  <p class="bem-stepper-sub">
+    How the BEM matrix is split across ranks and filled in parallel, and how it is applied
+    as a distributed matrix&ndash;vector product at each time-step in <code>compute_phi</code>.
+  </p>
+  <div class="bem-stepper-controls">
+    <button type="button" id="bem-asm-prev" aria-label="Previous step">&larr; Prev</button>
+    <button type="button" id="bem-asm-next" aria-label="Next step">Next &rarr;</button>
+    <span class="bem-step-counter" id="bem-asm-counter" aria-live="polite"></span>
+  </div>
+  <div class="bem-stepper-panel">
+    <h5 id="bem-asm-title"></h5>
+    <p class="bem-step-text" id="bem-asm-text"></p>
+    <div id="bem-asm-svg-wrap"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+function pal(){
+  var s=getComputedStyle(document.documentElement);
+  var g=function(v,fb){var r=s.getPropertyValue(v).trim();return r||fb;};
+  return {
+    bg :g("--color-background","#1a1b1e"),
+    bg2:g("--color-background-secondary","#26272b"),
+    bdr:g("--color-background-border","#3a3c42"),
+    fg :g("--color-foreground","#e1e2e6"),
+    mut:g("--color-foreground-muted","#8b8fa8"),
+    lnk:g("--color-link","#6ea8fe"),
+    r0:"#4da6ff", r1:"#5dbd73", r2:"#f0a050",
+    hi:"#e06c75",
+  };
+}
+
+var NS="http://www.w3.org/2000/svg";
+function el(tag,a){
+  var e=document.createElementNS(NS,tag);
+  for(var k in a) if(a.hasOwnProperty(k)) e.setAttribute(k,a[k]);
+  return e;
+}
+function mksvg(vw,vh){
+  var s=el("svg",{viewBox:"0 0 "+vw+" "+vh,
+    style:"width:100%;height:auto;max-height:300px;display:block;overflow:visible;"});
+  s.setAttribute("xmlns",NS); return s;
+}
+function rect(p,x,y,w,h,fill,stroke,extra){
+  var r=el("rect",Object.assign({x:x,y:y,width:w,height:h,fill:fill,
+    stroke:stroke||"none","stroke-width":"1.5",rx:"3"},extra||{}));
+  p.appendChild(r); return r;
+}
+function txt(p,str,x,y,st){
+  var t=el("text",{x:x,y:y});
+  t.setAttribute("style",st||"");
+  t.textContent=str;
+  p.appendChild(t); return t;
+}
+function arrow(p,x1,y1,x2,y2,col,sw){
+  var g=el("g",{});
+  var l=el("line",{x1:x1,y1:y1,x2:x2,y2:y2,stroke:col,"stroke-width":sw||1.5});
+  g.appendChild(l);
+  var a=Math.atan2(y2-y1,x2-x1),S=7;
+  var poly=el("polygon",{points:
+    (x2-S*Math.cos(a-0.4))+","+(y2-S*Math.sin(a-0.4))+" "+
+    x2+","+y2+" "+
+    (x2-S*Math.cos(a+0.4))+","+(y2-S*Math.sin(a+0.4)),fill:col});
+  g.appendChild(poly); p.appendChild(g); return g;
+}
+function ha(hex,a){
+  var c=document.createElement("canvas").getContext("2d");
+  c.fillStyle=hex;
+  return "rgba("+parseInt(c.fillStyle.slice(1,3),16)+","+
+    parseInt(c.fillStyle.slice(3,5),16)+","+
+    parseInt(c.fillStyle.slice(5,7),16)+","+a+")";
+}
+
+/* helper: render "B(r)" with a proper raised superscript "(r)" */
+function txtBr(p,r,cx,cy,col,fs){
+  /* main B */
+  var g=el("g",{});
+  var tB=el("text",{x:cx,y:cy,style:"fill:"+col+";font-size:"+fs+"px;font-weight:700;font-style:italic;text-anchor:middle;"});
+  tB.textContent="B";
+  /* superscript "(r)" shifted right and up */
+  var ts=el("text",{x:cx+fs*0.38,y:cy-fs*0.52,
+    style:"fill:"+col+";font-size:"+(fs*0.62)+"px;font-weight:600;text-anchor:start;"});
+  ts.textContent="("+r+")";
+  g.appendChild(tB); g.appendChild(ts); p.appendChild(g);
+}
+
+/* helper: render "N" italic + "bnd" subscript */
+function txtNbnd(p,cx,cy,col,fs){
+  var tN=el("text",{x:cx,y:cy,
+    style:"fill:"+col+";font-size:"+fs+"px;font-style:italic;text-anchor:end;"});
+  tN.textContent="N";
+  var ts=el("text",{x:cx,y:cy+(fs*0.3),
+    style:"fill:"+col+";font-size:"+(fs*0.72)+"px;text-anchor:start;"});
+  ts.textContent="bnd";
+  p.appendChild(tN); p.appendChild(ts);
+}
+
+/* ── Step 1: row ownership ── */
+function drawOwnership(){
+  var p=pal(), S=mksvg(560,210);
+  rect(S,0,0,560,210,p.bg);
+
+  /* column header using Nbnd helper */
+  var hx=280, hy=16;
+  var hpre=el("text",{x:hx-40,y:hy,style:"fill:"+p.mut+";font-size:10.5px;text-anchor:middle;"});
+  hpre.textContent="columns  (one per global boundary node)";
+  S.appendChild(hpre);
+  txtNbnd(S,hx-40-hpre.textContent.length*2.9,hy,p.mut,10.5); /* approximate; overridden below */
+  /* simpler: build the whole header as one text + tspan */
+  while(S.lastChild!==S.firstChild) S.removeChild(S.lastChild); /* clear the two above */
+  var hdr=el("text",{x:280,y:16,style:"fill:"+p.mut+";font-size:10.5px;text-anchor:middle;"});
+  var sp1=el("tspan",{}); sp1.textContent="N";
+  var sp2=el("tspan",{dy:"3",style:"font-size:8px;"}); sp2.textContent="bnd";
+  var sp3=el("tspan",{dy:"-3"}); sp3.textContent="  columns  (one per global boundary node)";
+  hdr.appendChild(sp1); hdr.appendChild(sp2); hdr.appendChild(sp3);
+  S.appendChild(hdr);
+
+  var mw=420, mx=70, rh=48, ry=[26,80,134];
+  var cols=[p.r0,p.r1,p.r2];
+  rect(S,mx,26,mw,3*rh+4,p.bg2,p.bdr,{rx:"4"});
+  /* row labels: build with tspan for subscripts */
+  var rowLabels=[
+    ["rank 0  \u2014  rows 0 \u2026 n","0","\u22121"],
+    ["rank 1  \u2014  rows n","0"," \u2026 n","0","+n","1","\u22121"],
+    ["rank 2  \u2014  rows n","0","+n","1"," \u2026 N","bnd","\u22121"],
+  ];
+  /* simplest legible approach: plain Unicode text per row */
+  var lbs=[
+    "rank 0  \u2014  rows  0 \u2026 n\u2080\u22121",
+    "rank 1  \u2014  rows  n\u2080 \u2026 n\u2080+n\u2081\u22121",
+    "rank 2  \u2014  rows  n\u2080+n\u2081 \u2026 N\u209Bnd\u22121",
+  ];
+  /* N with subscript bnd: use two-part tspan inline */
+  for(var i=0;i<3;i++){
+    rect(S,mx,ry[i],mw,rh,ha(cols[i],0.18),cols[i],{rx:"2"});
+    if(i<2){
+      txt(S,lbs[i],mx+mw/2,ry[i]+rh/2+5,
+        "fill:"+cols[i]+";font-size:11.5px;font-weight:600;text-anchor:middle;");
+    } else {
+      /* row 2: render "N_bnd" with proper tspan subscript */
+      var t=el("text",{x:mx+mw/2,y:ry[i]+rh/2+5,
+        style:"fill:"+cols[i]+";font-size:11.5px;font-weight:600;text-anchor:middle;"});
+      var s1=el("tspan",{}); s1.textContent="rank 2  \u2014  rows  n\u2080+n\u2081 \u2026 N";
+      var s2=el("tspan",{dy:"3",style:"font-size:8.5px;font-weight:600;"}); s2.textContent="bnd";
+      var s3=el("tspan",{dy:"-3"}); s3.textContent="\u22121";
+      t.appendChild(s1); t.appendChild(s2); t.appendChild(s3);
+      S.appendChild(t);
+    }
+  }
+
+  /* brace on the LEFT side of the matrix block, pointing right (into the block) */
+  var bx=mx-14, by=26, bh=3*rh+4;
+  S.appendChild(el("line",{x1:bx,y1:by,x2:bx,y2:by+bh,stroke:p.mut,"stroke-width":"1.5"}));
+  S.appendChild(el("line",{x1:bx,y1:by,x2:bx+6,y2:by,stroke:p.mut,"stroke-width":"1.5"}));
+  S.appendChild(el("line",{x1:bx,y1:by+bh,x2:bx+6,y2:by+bh,stroke:p.mut,"stroke-width":"1.5"}));
+  /* N_bnd label to the left of the brace */
+  var lb=el("text",{x:bx-4,y:by+bh/2+4,
+    style:"fill:"+p.mut+";font-size:10px;text-anchor:end;"});
+  var lbN=el("tspan",{}); lbN.textContent="N";
+  var lbS=el("tspan",{dy:"3",style:"font-size:7.5px;"}); lbS.textContent="bnd";
+  lb.appendChild(lbN); lb.appendChild(lbS);
+  S.appendChild(lb);
+
+  var ft=el("text",{x:280,y:200,
+    style:"fill:"+p.mut+";font-size:10px;text-anchor:middle;font-style:italic;"});
+  ft.textContent="Each rank owns its rows and stores one dense block of shape (n\u1D63, N\u209Bnd).";
+  S.appendChild(ft);
+  return S;
+}
+
+/* ── Step 2: allgather then parallel fill ── */
+function drawFill(){
+  var p=pal(), S=mksvg(560,240);
+  rect(S,0,0,560,240,p.bg);
+
+  var cols=[p.r0,p.r1,p.r2];
+  var bw=96, bh=44, by=12, bx=[30,232,434];
+  for(var i=0;i<3;i++){
+    rect(S,bx[i],by,bw,bh,ha(cols[i],0.2),cols[i],{rx:"3"});
+    txt(S,"rank "+i,bx[i]+bw/2,by+17,"fill:"+cols[i]+";font-size:11px;font-weight:600;text-anchor:middle;");
+    txt(S,"local geom.",bx[i]+bw/2,by+33,"fill:"+p.mut+";font-size:9.5px;text-anchor:middle;");
+  }
+
+  for(var j=0;j<3;j++){
+    arrow(S,bx[j]+bw/2,by+bh+2,bx[j]+bw/2,by+bh+24,cols[j],1.5);
+  }
+
+  txt(S,"comm.allgather()  \u2014  one call",280,by+bh+44,
+    "fill:"+p.lnk+";font-size:11.5px;font-weight:700;text-anchor:middle;");
+
+  var gy=by+bh+56;
+  rect(S,30,gy,500,44,ha(p.lnk,0.1),p.lnk,{rx:"3","stroke-dasharray":"5,3"});
+  txt(S,"full boundary geometry on every rank",280,gy+17,
+    "fill:"+p.lnk+";font-size:11.5px;font-weight:600;text-anchor:middle;");
+  txt(S,"(coordinates, facets, ghost tables)",280,gy+33,
+    "fill:"+p.mut+";font-size:10px;text-anchor:middle;");
+
+  var ly=gy+60;
+  txt(S,"\u25B6  Stage 4: all ranks fill their row block in parallel, no MPI inside the loop",280,ly,
+    "fill:"+p.fg+";font-size:10.5px;text-anchor:middle;");
+
+  /* three B(r) blocks, evenly spaced */
+  var fw=120, fh=36, fy=ly+12, fgap=(500-3*fw)/2, fx0=30;
+  for(var k=0;k<3;k++){
+    var fx=fx0+k*(fw+fgap);
+    rect(S,fx,fy,fw,fh,ha(cols[k],0.22),cols[k],{rx:"2"});
+    txtBr(S,k,fx+fw/2,fy+fh/2+6,cols[k],16);
+  }
+  return S;
+}
+
+/* ── Step 3: distributed matvec at each time-step ── */
+function drawMatvec(){
+  var p=pal(), S=mksvg(560,210);
+  rect(S,0,0,560,210,p.bg);
+
+  var cols=[p.r0,p.r1,p.r2];
+  var mw=195, mh=40, mx=16, my=[14,60,106];
+  for(var i=0;i<3;i++){
+    rect(S,mx,my[i],mw,mh,ha(cols[i],0.2),cols[i],{rx:"2"});
+    /* B(i) label with proper superscript */
+    var lx=mx+mw/2-10, ly2=my[i]+mh/2+5;
+    txtBr(S,i,lx,ly2,cols[i],13);
+    /* " (ni × Nbnd)" after the B(i) */
+    var nt=el("text",{x:lx+20,y:ly2,
+      style:"fill:"+cols[i]+";font-size:10px;font-weight:600;text-anchor:start;"});
+    var na=el("tspan",{}); na.textContent="  (n"+i+" \u00D7 N";
+    var nb=el("tspan",{dy:"2.5",style:"font-size:7.5px;font-weight:600;"}); nb.textContent="bnd";
+    var nc=el("tspan",{dy:"-2.5"}); nc.textContent=")";
+    nt.appendChild(na); nt.appendChild(nb); nt.appendChild(nc);
+    S.appendChild(nt);
+  }
+  txt(S,"BEM (read-only)",mx+mw/2,158,"fill:"+p.mut+";font-size:9.5px;text-anchor:middle;");
+
+  txt(S,"\u00D7",232,80,"fill:"+p.fg+";font-size:26px;font-weight:700;text-anchor:middle;");
+
+  /* phi0 vector */
+  var vx=248, vy=14, vw=52, vh=132;
+  rect(S,vx,vy,vw,vh,ha(p.lnk,0.18),p.lnk,{rx:"2"});
+  txt(S,"\u03C6\u2080",vx+vw/2,vy+vh/2+5,"fill:"+p.lnk+";font-size:14px;font-weight:700;text-anchor:middle;");
+  /* Nbnd label */
+  var vnt=el("text",{x:vx+vw/2,y:vy+vh/2+20,
+    style:"fill:"+p.mut+";font-size:9px;text-anchor:middle;"});
+  var vnN=el("tspan",{}); vnN.textContent="N";
+  var vnS=el("tspan",{dy:"2.5",style:"font-size:7px;"}); vnS.textContent="bnd";
+  vnt.appendChild(vnN); vnt.appendChild(vnS);
+  S.appendChild(vnt);
+  txt(S,"global \u03C6\u2080",vx+vw/2,158,"fill:"+p.mut+";font-size:9.5px;text-anchor:middle;");
+
+  txt(S,"=",320,80,"fill:"+p.fg+";font-size:26px;font-weight:700;text-anchor:middle;");
+
+  var rx2=334, rw=125;
+  for(var k=0;k<3;k++){
+    rect(S,rx2,my[k],rw,mh,ha(cols[k],0.2),cols[k],{rx:"2"});
+    txt(S,"\u03C6\u2081  rank "+k,rx2+rw/2,my[k]+mh/2+5,
+      "fill:"+cols[k]+";font-size:11px;font-weight:600;text-anchor:middle;");
+  }
+  txt(S,"local \u03C6\u2081",rx2+rw/2,158,"fill:"+p.mut+";font-size:9.5px;text-anchor:middle;");
+
+  txt(S,"np.dot \u2014 pure local compute, no MPI",280,190,
+    "fill:"+p.mut+";font-size:10px;text-anchor:middle;font-style:italic;");
+  return S;
+}
+
+var STEPS=[
+  {title:"1. Row ownership across MPI ranks",
+   text:"Each rank r owns n\u1D63 boundary nodes and stores exactly those rows of B as a dense block of shape (n\u1D63, N_bnd). Ranks whose volume partition does not intersect the boundary own zero rows and allocate no block.",
+   draw:drawOwnership},
+  {title:"2. One-time geometry allgather, then parallel fill",
+   text:"Stage 2 broadcasts the full boundary geometry (coordinates, facets, ghost index tables) to every rank in a single collective. Each rank then fills its own row block independently, looping over all facets from all ranks — no further MPI communication occurs during the fill.",
+   draw:drawFill},
+  {title:"3. Distributed matrix\u2013vector product at each time-step",
+   text:"compute_phi collects the global \u03C6\u2080 boundary vector via a single MPI_Allgatherv. Each rank then multiplies its own row block by that vector (np.dot) to obtain its portion of the Dirichlet data for \u03C6\u2081. B is never modified after assembly.",
+   draw:drawMatvec},
+];
+
+var step=0;
+var wrap=document.getElementById("bem-asm-svg-wrap");
+var titleEl=document.getElementById("bem-asm-title");
+var textEl=document.getElementById("bem-asm-text");
+var ctr=document.getElementById("bem-asm-counter");
+var prev=document.getElementById("bem-asm-prev");
+var next=document.getElementById("bem-asm-next");
+
+function render(){
+  var s=STEPS[step];
+  titleEl.textContent=s.title;
+  textEl.textContent=s.text;
+  ctr.textContent="Step "+(step+1)+" / "+STEPS.length;
+  prev.disabled=(step===0);
+  next.disabled=(step===STEPS.length-1);
+  while(wrap.firstChild) wrap.removeChild(wrap.firstChild);
+  wrap.appendChild(s.draw());
+}
+
+prev.addEventListener("click",function(){if(step>0){step--;render();}});
+next.addEventListener("click",function(){if(step<STEPS.length-1){step++;render();}});
+render();
+})();
+</script>

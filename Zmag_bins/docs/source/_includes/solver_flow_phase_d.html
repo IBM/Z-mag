@@ -1,0 +1,143 @@
+<div class="solver-flow-svg solver-flow-svg--phase" role="img" aria-label="Phase D — Residual gate">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 600">
+  <defs>
+    <marker id="pd-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-foreground-muted, #6b6f76)" stroke="none"/>
+    </marker>
+  </defs>
+
+  <!--
+    viewBox 560 × 660    cx-spine = 230
+    Spine boxes  x=30..390  w=360   (matches phases B/C)
+    Diamonds     half-w=110  left-tip=120  right-tip=340
+      — narrower than boxes so tips stay well inside canvas; one short label line each
+
+    RIGHT bypass lanes (clear of all boxes, right edge = 390):
+      R1  x=410   gate passes — yes from right-tip (340,72)
+      R2  x=430   D1 accepted — right edge of D1-ok box (390,244)
+      R3  x=450   D2 yes      — right-tip (340,416)
+    All three descend to y=626 (collector row below Proceed).
+    Collector: H← from (450,626) to merge dot (230,626);
+    arrow: ↑ from (230,626) into bottom of Proceed box at (230,578).
+
+    LEFT bus x=10:
+      D1-no:  (120,192) → H10 → V360 → H30   Restore box
+      D2-no:  (120,416) → H10 → V478 → H30   D3 box
+
+    y layout
+      Title         6..34    h=28
+      ↓20           34→54
+      Gate ◇        cy=72    top=54  bot=90   half-w=110   1 label line
+      ↓18           90→108
+      D1 box        108..160 h=52   (title + subtitle)
+      ↓18           160→178
+      D1 result ◇   cy=192   top=178 bot=206  half-w=110   1 label line
+      ↓18           206→224
+      D1-ok box     224..256 h=32
+      (gap — left bus from y=192 drops to y=360)
+      Restore box   344..376 h=32
+      ↓18           376→394
+      D2 ◇          cy=416   top=394 bot=438  half-w=110   1 label line
+      ↓18           438→456
+      D3 box        456..508 h=52   (title + subtitle)
+      ↓18           508→526
+      Proceed (E)   526..578 h=52
+      Merge row     y=626
+  -->
+
+  <!-- Title bar -->
+  <rect x="10" y="6" width="540" height="28" rx="5" class="sf-box sf-accent"/>
+  <text x="280" y="25" text-anchor="middle" class="sf-lbl" font-size="13">(D) Residual gate — D1 · D2 · D3  (<tspan class="sf-tt" font-size="11">_apply_residual_gate</tspan>)</text>
+
+  <!-- ↓ Title → Gate diamond -->
+  <path d="M 230 34 V 54" class="sf-edge" marker-end="url(#pd-a)"/>
+
+  <!-- Gate diamond  cy=72  half-w=110  — one short label, warmup note on arrow below -->
+  <polygon points="230,54 340,72 230,90 120,72" class="sf-diamond"/>
+  <text x="230" y="76" text-anchor="middle" class="sf-lbl" font-size="12">&#x2016;<tspan class="sf-math">F</tspan>&#x2016; &#x2264; <tspan class="sf-math">g</tspan><tspan dy="3" font-size="8">res</tspan><tspan dy="-3"> ?</tspan></text>
+
+  <!-- Gate yes → R1 bypass lane -->
+  <path d="M 340 72 H 410 V 590" class="sf-edge"/>
+  <text x="343" y="67" class="sf-br" font-size="10">yes</text>
+
+  <!-- Gate no ↓ D1  (warmup note on arrow) -->
+  <path d="M 230 90 V 108" class="sf-edge" marker-end="url(#pd-a)"/>
+  <text x="237" y="101" class="sf-br" font-size="10">no</text>
+  <text x="237" y="112" class="sf-sub" font-size="9">warmup: None → skip</text>
+
+  <!-- D1 box  h=52 -->
+  <rect x="30" y="120" width="360" height="52" rx="5" class="sf-box sf-accent"/>
+  <text x="210" y="141" text-anchor="middle" class="sf-lbl" font-size="13">D1: chord line search</text>
+  <text x="210" y="159" text-anchor="middle" class="sf-sub" font-size="11"><tspan class="sf-math">q</tspan> &#x2190; <tspan class="sf-math">q</tspan><tspan dy="3" font-size="9">n</tspan><tspan dy="-3"> + <tspan class="sf-math">&#x03BB;</tspan>(<tspan class="sf-math">q</tspan><tspan dy="3" font-size="9">trial</tspan><tspan dy="-3"> &#x2212; <tspan class="sf-math">q</tspan><tspan dy="3" font-size="9">n</tspan><tspan dy="-3">)  &#x2014;  re-eval &#x2016;<tspan class="sf-math">F</tspan>&#x2016; without SNES</tspan></tspan></tspan></text>
+
+  <!-- ↓ D1 → D1 result diamond  (longer arrow: 172→198) -->
+  <path d="M 230 172 V 198" class="sf-edge" marker-end="url(#pd-a)"/>
+
+  <!-- D1 result diamond  cy=216  half-w=110 -->
+  <polygon points="230,198 340,216 230,234 120,216" class="sf-diamond"/>
+  <text x="230" y="220" text-anchor="middle" class="sf-lbl" font-size="12"><tspan class="sf-math">&#x03BB;</tspan> found?</text>
+
+  <!-- D1 yes ↓ D1-ok box -->
+  <path d="M 230 234 V 252" class="sf-edge" marker-end="url(#pd-a)"/>
+  <text x="237" y="247" class="sf-br" font-size="10">yes</text>
+
+  <!-- D1-ok box  h=32  (top=252) -->
+  <rect x="30" y="252" width="360" height="32" rx="5" class="sf-box sf-ok"/>
+  <text x="210" y="273" text-anchor="middle" class="sf-lbl" font-size="13">D1 accepted — retain damped state; refresh energies</text>
+
+  <!-- D1-ok → R2 bypass lane -->
+  <path d="M 390 268 H 430 V 590" class="sf-edge"/>
+
+  <!-- D1 no → left bus → Restore box -->
+  <path d="M 120 216 H 10 V 300 H 30" class="sf-edge" marker-end="url(#pd-a)"/>
+  <text x="13" y="210" class="sf-br" font-size="10">no</text>
+
+  <!-- Restore box  h=32  (top=284, closer gap after D1-ok) -->
+  <rect x="30" y="284" width="360" height="32" rx="5" class="sf-box"/>
+  <text x="210" y="305" text-anchor="middle" class="sf-lbl" font-size="13">Restore SNES trial (<tspan class="sf-math">&#x03BB;</tspan> = 1); refresh energies</text>
+
+  <!-- ↓ Restore → D2 diamond -->
+  <path d="M 230 316 V 334" class="sf-edge" marker-end="url(#pd-a)"/>
+
+  <!-- D2 diamond  cy=356  half-w=110 -->
+  <polygon points="230,334 340,356 230,378 120,356" class="sf-diamond"/>
+  <text x="230" y="360" text-anchor="middle" class="sf-lbl" font-size="12">D2: merit accept?</text>
+
+  <!-- D2 yes → R3 bypass lane -->
+  <path d="M 340 356 H 450 V 590" class="sf-edge"/>
+  <text x="343" y="351" class="sf-br" font-size="10">yes</text>
+
+  <!-- D2 no → left bus → D3 -->
+  <path d="M 120 356 H 10 V 418 H 30" class="sf-edge" marker-end="url(#pd-a)"/>
+  <text x="13" y="350" class="sf-br" font-size="10">no</text>
+
+  <!-- D3 box  h=52  (top=396) -->
+  <rect x="30" y="396" width="360" height="52" rx="5" class="sf-box sf-accent"/>
+  <text x="210" y="417" text-anchor="middle" class="sf-lbl" font-size="13">D3: soft continue — no rejection</text>
+  <text x="210" y="435" text-anchor="middle" class="sf-sub" font-size="11">set <tspan class="sf-tt" font-size="10">residual_soft_violation</tspan>;  cap <tspan class="sf-math">&#x394;t</tspan>* growth</text>
+
+  <!-- ↓ D3 → Proceed -->
+  <path d="M 230 448 V 466" class="sf-edge" marker-end="url(#pd-a)"/>
+
+  <!-- Proceed to (E)  h=52  (top=466) -->
+  <rect x="60" y="466" width="300" height="52" rx="5" class="sf-box sf-ok"/>
+  <text x="210" y="488" text-anchor="middle" class="sf-lbl" font-size="13">Proceed to (E)</text>
+  <text x="210" y="505" text-anchor="middle" class="sf-sub" font-size="11">Thermodynamic gate</text>
+
+  <!-- ══ YES BYPASS MERGE ══
+       R1(410) starts at Gate yes, R2(430) from D1-ok, R3(450) from D2 yes
+       all descend to y=590; collector H← to merge dot (230,590);
+       arrow ↑ into bottom of Proceed box at (230,518). -->
+
+  <!-- Horizontal collector -->
+  <path d="M 450 590 H 230" class="sf-edge"/>
+
+  <!-- Merge dot -->
+  <circle cx="230" cy="590" r="4" fill="var(--color-foreground-muted,#6b6f76)"/>
+
+  <!-- Arrow up into bottom of Proceed box -->
+  <path d="M 230 590 V 518" class="sf-edge" marker-end="url(#pd-a)"/>
+
+</svg>
+<!-- viewBox 560 × 660 -->
+</div>

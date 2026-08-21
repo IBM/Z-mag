@@ -1,0 +1,151 @@
+<div class="solver-flow-svg solver-flow-svg--overview" role="img" aria-label="Z-mag simulation setup workflow">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 740">
+  <defs>
+    <marker id="gs-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-foreground-muted, #6b6f76)" stroke="none"/>
+    </marker>
+  </defs>
+
+  <!--
+    Canvas 560 × 740   cx = 220
+    Spine boxes: x=20..420 (w=400)
+    "demag only" side note: x=430..550 (w=120)
+
+    y layout (18 px inter-box arrows, 28 px title)
+      Title bar       y=6..34    h=28
+      ↓18             34→52
+      Step 1 mesh     y=52..96   h=44   (title + subtitle)
+      ↓18             96→114
+      Step 2 solver   y=114..158 h=44
+      ↓18             158→176
+      Step 3 mesh+mat y=176..220 h=44
+      ↓18             220→238
+      Step 4 demag ◇  cy=256     top=238 bot=274  half-w=100
+        demag branch: right tip (320,256) → side note box
+        nodemag: yes ↓ down
+      ↓18             274→292
+      Step 5 init     y=292..336 h=44
+      ↓18             336→354
+      Step 6 time int y=354..398 h=44
+      ↓18             398→416
+      solve_problem   y=416..460 h=44   sf-ok
+      ↓18             460→478
+      Output          y=478..522 h=44
+
+    "demag only" side box: x=436..550 y=243..301 (h=58)
+      - enters from right diamond tip (320,256) → H 436
+      - exits bottom (493,301) → V 354 → H 420 (merge back at Step 6 left)
+  -->
+
+  <!-- Title bar -->
+  <rect x="10" y="6" width="540" height="28" rx="5" class="sf-box sf-accent"/>
+  <text x="280" y="25" text-anchor="middle" class="sf-lbl" font-size="13">Z-mag simulation setup workflow</text>
+
+  <!-- ↓ Title → Step 1 -->
+  <path d="M 220 34 V 52" class="sf-edge" marker-end="url(#gs-a)"/>
+
+  <!-- Step 1: Build a mesh -->
+  <rect x="20" y="52" width="400" height="44" rx="5" class="sf-box"/>
+  <text x="220" y="74" text-anchor="middle" class="sf-lbl" font-size="13">1  Build a mesh</text>
+  <text x="220" y="91" text-anchor="middle" class="sf-sub" font-size="11">Gmsh geometry &#x2192; cell tags + facet tags &#x2192; DOLFINx mesh</text>
+
+  <!-- ↓ Step 1 → Step 2 -->
+  <path d="M 220 96 V 114" class="sf-edge" marker-end="url(#gs-a)"/>
+
+  <!-- Step 2: Create the solver -->
+  <rect x="20" y="114" width="400" height="44" rx="5" class="sf-box sf-accent"/>
+  <text x="220" y="136" text-anchor="middle" class="sf-lbl" font-size="13">2  Create the solver</text>
+  <text x="220" y="153" text-anchor="middle" class="sf-tt sf-sub" font-size="11">create_stereo_solver(args, model="demag"|"nodemag")</text>
+
+  <!-- ↓ Step 2 → Step 3 -->
+  <path d="M 220 158 V 176" class="sf-edge" marker-end="url(#gs-a)"/>
+
+  <!-- Step 3: Attach mesh + materials -->
+  <rect x="20" y="176" width="400" height="44" rx="5" class="sf-box"/>
+  <text x="220" y="198" text-anchor="middle" class="sf-lbl" font-size="13">3  Attach mesh, materials, external field</text>
+  <text x="220" y="215" text-anchor="middle" class="sf-sub" font-size="11">set_mesh · set_materials · set_external_field</text>
+
+  <!-- ↓ Step 3 → Diamond -->
+  <path d="M 220 220 V 238" class="sf-edge" marker-end="url(#gs-a)"/>
+
+  <!-- Diamond: demag or nodemag?  cy=256  half-w=100 -->
+  <polygon points="220,238 320,256 220,274 120,256" class="sf-diamond"/>
+  <text x="220" y="260" text-anchor="middle" class="sf-lbl" font-size="11">demag model?</text>
+
+  <!-- demag branch: right tip → side note -->
+  <path d="M 320 256 H 436" class="sf-edge" marker-end="url(#gs-a)"/>
+  <text x="324" y="250" class="sf-br" font-size="10">yes</text>
+
+  <!-- Demag side box -->
+  <rect x="436" y="243" width="114" height="58" rx="5" class="sf-box sf-accent"/>
+  <text x="493" y="264" text-anchor="middle" class="sf-lbl" font-size="12">4  Magnetostatics</text>
+  <text x="493" y="282" text-anchor="middle" class="sf-sub" font-size="10">set_magnetostatics</text>
+  <text x="493" y="295" text-anchor="middle" class="sf-sub" font-size="10">set_BEMcpp</text>
+
+  <!-- Demag side box bottom → merge back at Step 5 top -->
+  <path d="M 493 301 V 314 H 420" class="sf-edge" marker-end="url(#gs-a)"/>
+
+  <!-- nodemag branch: straight down -->
+  <path d="M 220 274 V 314" class="sf-edge" marker-end="url(#gs-a)"/>
+  <text x="228" y="286" class="sf-br" font-size="10">no — skip</text>
+
+  <!-- Step 5: Initialise magnetization -->
+  <rect x="20" y="314" width="400" height="44" rx="5" class="sf-box"/>
+  <text x="220" y="336" text-anchor="middle" class="sf-lbl" font-size="13">5  Initialise magnetization</text>
+  <text x="220" y="353" text-anchor="middle" class="sf-sub" font-size="11">set_init_q_from_angles &#x2014; set chart fields <tspan class="sf-math">q</tspan><tspan dy="3" font-size="9">A</tspan><tspan dy="-3">, <tspan class="sf-math">q</tspan><tspan dy="3" font-size="9">B</tspan></tspan></text>
+
+  <!-- ↓ Step 5 → Step 6 -->
+  <path d="M 220 358 V 376" class="sf-edge" marker-end="url(#gs-a)"/>
+
+  <!-- Step 6: Configure time integrator -->
+  <rect x="20" y="376" width="400" height="44" rx="5" class="sf-box sf-accent"/>
+  <text x="220" y="398" text-anchor="middle" class="sf-lbl" font-size="13">6  Configure time integrator</text>
+  <text x="220" y="415" text-anchor="middle" class="sf-sub" font-size="11">dt · step range · CFL · write_target · checkpoint</text>
+
+  <!-- ↓ Step 6 → init_dynamic -->
+  <path d="M 220 420 V 438" class="sf-edge" marker-end="url(#gs-a)"/>
+
+  <!-- init_dynamic -->
+  <rect x="20" y="438" width="400" height="32" rx="5" class="sf-box"/>
+  <text x="220" y="459" text-anchor="middle" class="sf-tt sf-lbl" font-size="13">init_dynamic(args_init_dyn)</text>
+
+  <!-- ↓ init_dynamic → solve_problem -->
+  <path d="M 220 470 V 488" class="sf-edge" marker-end="url(#gs-a)"/>
+
+  <!-- solve_problem -->
+  <rect x="20" y="488" width="400" height="44" rx="5" class="sf-box sf-ok"/>
+  <text x="220" y="510" text-anchor="middle" class="sf-tt sf-lbl" font-size="13">solve_problem()</text>
+  <text x="220" y="527" text-anchor="middle" class="sf-sub" font-size="11">&#x394;t&#x2217;-retry loop: phases (A)&#x2013;(F) per step &#x2014; see Theory</text>
+
+  <!-- ↓ solve_problem → Output -->
+  <path d="M 220 532 V 550" class="sf-edge" marker-end="url(#gs-a)"/>
+
+  <!-- Output / results -->
+  <rect x="20" y="550" width="400" height="44" rx="5" class="sf-box sf-ok"/>
+  <text x="220" y="572" text-anchor="middle" class="sf-lbl" font-size="13">Results written to disk</text>
+  <text x="220" y="589" text-anchor="middle" class="sf-sub" font-size="11">mag · qA · qB · phi · checkpoints (ADIOS2)</text>
+
+  <!-- Separator -->
+  <line x1="20" y1="614" x2="540" y2="614" stroke="var(--color-background-border)" stroke-width="1"/>
+
+  <!-- Legend -->
+  <text x="30" y="632" class="sf-sub" font-size="11" font-style="italic">Badge key — solver outcome per acceptance attempt:</text>
+
+  <rect x="30" y="644" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="59" y="659" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">PASS</text>
+  <text x="96" y="659" class="sf-sub" font-size="11">attempt continues to next phase</text>
+
+  <rect x="30" y="672" width="58" height="22" rx="3" class="sf-box"/>
+  <text x="59" y="687" text-anchor="middle" class="sf-warn-txt" font-size="11" font-weight="700">WARN</text>
+  <text x="96" y="687" class="sf-sub" font-size="11">continues with diagnostic flag set</text>
+
+  <rect x="300" y="644" width="58" height="22" rx="3" class="sf-box sf-fail"/>
+  <text x="329" y="659" text-anchor="middle" class="sf-rej-txt" font-size="11" font-weight="700">REJECT</text>
+  <text x="366" y="659" class="sf-sub" font-size="11">&#x394;t&#x2217; reduced, retry</text>
+
+  <rect x="300" y="672" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="329" y="687" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">SKIP</text>
+  <text x="366" y="687" class="sf-sub" font-size="11">gate inactive (e.g. ramp phase)</text>
+
+</svg>
+</div>

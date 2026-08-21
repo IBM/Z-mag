@@ -1,0 +1,186 @@
+<div class="solver-flow-svg solver-flow-svg--outcomes" role="img" aria-label="Phase outcomes summary — all phases A through F">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 654">
+  <defs>
+    <marker id="so-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,5 0,10" style="fill: var(--color-foreground-muted, #6b6f76); stroke: none;"/>
+    </marker>
+  </defs>
+
+  <!--
+    viewBox 0 0 600 870
+    Spine:  x=8..178  (w=170, cx=93)   title-only boxes
+    Badge:  x=186..244 (w=58, cx=215)
+    Text:   x=252..592
+
+    Box height = badge stack: 1 badge=22, 2 badges=48, 3 badges=74
+    Badge h=22, gap between badges=4, arrow between phases=16
+    Box top/bottom flush with first/last badge top/bottom (no padding).
+
+    Continuation text lines (↳ indent, fallthrough notes) live in the right
+    column only, below the last badge; they expand the inter-phase gap on
+    the right side but the left spine arrow length stays constant at 16.
+
+    y layout — box top | badges | box bottom | arrow | next box top
+    ──────────────────────────────────────────────────────────────────
+    Title bar   y=4..30  (h=26)   gap=8
+    (A)  box  y=38..60   (h=22)  1 badge  @y=38  arrow y=60..76  gap=16
+    (B)  box  y=76..150  (h=74)  3 badges @y=76,100,124  +note@148  arrow y=150..166
+    (C)  box  y=166..240 (h=74)  3 badges @y=166,190,214  arrow y=240..256
+    (D)  box  y=256..278 (h=22)  1 badge  @y=256  +note@280  arrow y=278..294
+    D1   box  y=294..316 (h=22)  1 badge  @y=294  +note@318  arrow y=316..332
+    D2   box  y=332..354 (h=22)  1 badge  @y=332  +note@356  arrow y=354..370
+    D3   box  y=370..392 (h=22)  1 badge  @y=370  +note@392  arrow y=392..408
+    (E)  box  y=408..456 (h=48)  2 badges @y=408,432  +note@458  arrow y=456..472
+    E1   box  y=472..520 (h=48)  2 badges @y=472,496  +note@520  arrow y=520..536
+    (F)  box  y=536..610 (h=74)  3 badges @y=536,560,584  arrow y=610..626
+    Commit box y=626..648 (h=22)  centred label
+  -->
+
+  <!-- ═══ Title ════════════════════════════════════════════════════ -->
+  <rect x="8" y="4" width="584" height="26" rx="4" class="sf-box sf-accent"/>
+  <text x="300" y="22" text-anchor="middle" class="sf-lbl" font-size="13">Phase outcomes — one acceptance attempt</text>
+
+  <!-- ═══ (A) y=38..60  1 badge ════════════════════════════════════ -->
+  <rect x="8" y="38" width="170" height="22" rx="4" class="sf-box sf-accent"/>
+  <text x="93" y="53" text-anchor="middle" class="sf-lbl" font-size="13">(A) Nonlinear solve</text>
+  <!-- arrow 60→76 -->
+  <path d="M 93 60 V 76" class="sf-edge" marker-end="url(#so-a)"/>
+
+  <rect x="186" y="38" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="215" y="53" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">PASS</text>
+  <text x="252" y="53" class="sf-sub" font-size="11">always — trial state in <tspan class="sf-tt">qA</tspan>/<tspan class="sf-tt">qB</tspan>; to (B)</text>
+
+  <!-- ═══ (B) y=76..150  3 badges ══════════════════════════════════ -->
+  <rect x="8" y="76" width="170" height="74" rx="4" class="sf-box sf-accent"/>
+  <text x="93" y="117" text-anchor="middle" class="sf-lbl" font-size="13">(B) Algebraic validity</text>
+  <!-- arrow 150→166 -->
+  <path d="M 93 150 V 166" class="sf-edge" marker-end="url(#so-a)"/>
+
+  <rect x="186" y="76" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="215" y="91" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">PASS</text>
+  <text x="252" y="91" class="sf-sub" font-size="11">SNES/KSP converged, outer-split within tol — to (C)</text>
+
+  <rect x="186" y="102" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="215" y="117" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">RETRY</text>
+  <text x="252" y="117" class="sf-sub" font-size="11">disallowed reason (1st) or outer-split within budget — same <tspan class="sf-math">&#x394;t</tspan>*</text>
+
+  <rect x="186" y="128" width="58" height="22" rx="3" class="sf-box sf-fail"/>
+  <text x="215" y="143" text-anchor="middle" class="sf-rej-txt" font-size="11" font-weight="700">REJECT</text>
+  <text x="252" y="143" class="sf-sub" font-size="11">SNES/KSP divergence, disallowed reason (2nd), or split exhausted</text>
+  <text x="252" y="157" class="sf-sub" font-size="10">&#x21B3; restore <tspan class="sf-math">u</tspan><tspan dy="-3" font-size="8">n</tspan><tspan dy="3">; halve <tspan class="sf-math">&#x394;t</tspan>*; BDF2&#x2192;BDF1</tspan></text>
+
+  <!-- ═══ (C) y=166..240  3 badges ═════════════════════════════════ -->
+  <rect x="8" y="166" width="170" height="74" rx="4" class="sf-box sf-accent"/>
+  <text x="93" y="207" text-anchor="middle" class="sf-lbl" font-size="13">(C) Atlas radius guard</text>
+  <!-- arrow 240→256 -->
+  <path d="M 93 240 V 256" class="sf-edge" marker-end="url(#so-a)"/>
+
+  <rect x="186" y="166" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="215" y="181" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">PASS</text>
+  <text x="252" y="181" class="sf-sub" font-size="11"><tspan class="sf-math">r</tspan><tspan dy="3" font-size="8">max</tspan><tspan dy="-3"> &#x2264; <tspan class="sf-math">r</tspan><tspan dy="3" font-size="8">guard</tspan><tspan dy="-3"> — energy snapshot taken; to (D)</tspan></tspan></text>
+
+  <rect x="186" y="192" width="58" height="22" rx="3" class="sf-box"/>
+  <text x="215" y="207" text-anchor="middle" class="sf-warn-txt" font-size="11" font-weight="700">WARN</text>
+  <text x="252" y="207" class="sf-sub" font-size="11"><tspan class="sf-math">r</tspan><tspan dy="3" font-size="8">guard</tspan><tspan dy="-3"> &lt; <tspan class="sf-math">r</tspan><tspan dy="3" font-size="8">max</tspan><tspan dy="-3"> &#x2264; <tspan class="sf-math">g</tspan><tspan dy="3" font-size="8">hard</tspan><tspan dy="-3"> — diagnostic flag set; to (D)</tspan></tspan></text>
+
+  <rect x="186" y="218" width="58" height="22" rx="3" class="sf-box sf-fail"/>
+  <text x="215" y="233" text-anchor="middle" class="sf-rej-txt" font-size="11" font-weight="700">REJECT</text>
+  <text x="252" y="233" class="sf-sub" font-size="11"><tspan class="sf-math">r</tspan><tspan dy="3" font-size="8">max</tspan><tspan dy="-3"> &gt; <tspan class="sf-math">g</tspan><tspan dy="3" font-size="8">hard</tspan><tspan dy="-3"> — restore <tspan class="sf-math">u</tspan><tspan dy="-3" font-size="8">n</tspan><tspan dy="3">; halve <tspan class="sf-math">&#x394;t</tspan>*; BDF2&#x2192;BDF1</tspan></tspan></text>
+
+  <!-- ═══ (D) y=256..278  1 badge ══════════════════════════════════ -->
+  <rect x="8" y="256" width="170" height="22" rx="4" class="sf-box sf-accent"/>
+  <text x="93" y="271" text-anchor="middle" class="sf-lbl" font-size="13">(D) Residual gate</text>
+  <!-- arrow 278→294 -->
+  <path d="M 93 278 V 294" class="sf-edge" marker-end="url(#so-a)"/>
+
+  <rect x="186" y="256" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="215" y="271" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">PASS</text>
+  <text x="252" y="271" class="sf-sub" font-size="11">&#x2016;<tspan class="sf-math">F</tspan>&#x2016; &#x2264; <tspan class="sf-math">g</tspan><tspan dy="3" font-size="8">res</tspan><tspan dy="-3"> — full trial (<tspan class="sf-math">&#x03BB;</tspan>=1) retained; to (E)</tspan></text>
+  <text x="252" y="285" class="sf-sub" font-size="10">&#x21B3; violated: no RuntimeError — falls through D1 &#x2192; D2 &#x2192; D3</text>
+
+  <!-- ─── D1 y=294..316  1 badge ───────────────────────────────────── -->
+  <rect x="14" y="294" width="150" height="22" rx="3" class="sf-box"/>
+  <text x="89" y="309" text-anchor="middle" class="sf-lbl" font-size="12">D1: <tspan class="sf-math">&#x03BB;</tspan>-line search</text>
+  <!-- arrow 316→332 -->
+  <path d="M 93 316 V 332" class="sf-edge" marker-end="url(#so-a)"/>
+
+  <rect x="186" y="294" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="215" y="309" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">PASS</text>
+  <text x="252" y="309" class="sf-sub" font-size="11">some <tspan class="sf-math">&#x03BB;</tspan>&lt;1 satisfies &#x2016;<tspan class="sf-math">F</tspan>&#x2016; &#x2264; <tspan class="sf-math">g</tspan><tspan dy="3" font-size="8">res</tspan><tspan dy="-3"> — blended state; to (E)</tspan></text>
+  <text x="252" y="323" class="sf-sub" font-size="10">&#x21B3; no <tspan class="sf-math">&#x03BB;</tspan> found: full trial restored; falls through to D2</text>
+
+  <!-- ─── D2 y=332..354  1 badge ───────────────────────────────────── -->
+  <rect x="14" y="332" width="150" height="22" rx="3" class="sf-box"/>
+  <text x="89" y="347" text-anchor="middle" class="sf-lbl" font-size="12">D2: merit accept</text>
+  <!-- arrow 354→370 -->
+  <path d="M 93 354 V 370" class="sf-edge" marker-end="url(#so-a)"/>
+
+  <rect x="186" y="332" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="215" y="347" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">PASS</text>
+  <text x="252" y="347" class="sf-sub" font-size="11">contraction sufficient — full trial (<tspan class="sf-math">&#x03BB;</tspan>=1) retained; to (E)</text>
+  <text x="252" y="361" class="sf-sub" font-size="10">&#x21B3; merit fails: falls through to D3</text>
+
+  <!-- ─── D3 y=370..392  1 badge ───────────────────────────────────── -->
+  <rect x="14" y="370" width="150" height="22" rx="3" class="sf-box"/>
+  <text x="89" y="385" text-anchor="middle" class="sf-lbl" font-size="12">D3: soft continue</text>
+  <!-- arrow 392→408 -->
+  <path d="M 93 392 V 408" class="sf-edge" marker-end="url(#so-a)"/>
+
+  <rect x="186" y="370" width="58" height="22" rx="3" class="sf-box"/>
+  <text x="215" y="385" text-anchor="middle" class="sf-warn-txt" font-size="11" font-weight="700">SOFT</text>
+  <text x="252" y="385" class="sf-sub" font-size="11">full trial kept; soft-violation flag set; <tspan class="sf-math">&#x394;t</tspan>* growth capped; to (E)</text>
+
+  <!-- ═══ (E) y=408..456  2 badges ═════════════════════════════════ -->
+  <rect x="8" y="408" width="170" height="48" rx="4" class="sf-box sf-accent"/>
+  <text x="93" y="436" text-anchor="middle" class="sf-lbl" font-size="13">(E) Thermodynamic gate</text>
+  <!-- arrow 456→472 -->
+  <path d="M 93 456 V 472" class="sf-edge" marker-end="url(#so-a)"/>
+
+  <rect x="186" y="408" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="215" y="423" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">SKIP</text>
+  <text x="252" y="423" class="sf-sub" font-size="11">gate inactive (demag ramp / reconcile window) — to (F)</text>
+
+  <rect x="186" y="434" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="215" y="449" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">PASS</text>
+  <text x="252" y="449" class="sf-sub" font-size="11">inequality satisfied — to (F)</text>
+  <text x="252" y="463" class="sf-sub" font-size="10">&#x21B3; violated: no RuntimeError — falls through to E1</text>
+
+  <!-- ─── E1 y=472..520  2 badges ──────────────────────────────────── -->
+  <rect x="14" y="472" width="150" height="48" rx="3" class="sf-box"/>
+  <text x="89" y="500" text-anchor="middle" class="sf-lbl" font-size="12">E1: <tspan class="sf-math">&#x03BB;</tspan>-line search</text>
+  <!-- arrow 520→536 -->
+  <path d="M 93 520 V 536" class="sf-edge" marker-end="url(#so-a)"/>
+
+  <rect x="186" y="472" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="215" y="487" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">PASS</text>
+  <text x="252" y="487" class="sf-sub" font-size="11">some <tspan class="sf-math">&#x03BB;</tspan>&lt;1 satisfies thermo and residual — blended state; to (F)</text>
+
+  <rect x="186" y="498" width="58" height="22" rx="3" class="sf-box sf-fail"/>
+  <text x="215" y="513" text-anchor="middle" class="sf-rej-txt" font-size="11" font-weight="700">REJECT</text>
+  <text x="252" y="513" class="sf-sub" font-size="11">no admissible <tspan class="sf-math">&#x03BB;</tspan> — restore <tspan class="sf-math">u</tspan><tspan dy="-3" font-size="8">n</tspan><tspan dy="3">; cut <tspan class="sf-math">&#x394;t</tspan>* (overshoot-aware)</tspan></text>
+  <text x="252" y="527" class="sf-sub" font-size="10">&#x21B3; BDF2 kept on 1st rejection; BDF2&#x2192;BDF1 on 2nd consecutive</text>
+
+  <!-- ═══ (F) y=536..610  3 badges ═════════════════════════════════ -->
+  <rect x="8" y="536" width="170" height="74" rx="4" class="sf-box sf-accent"/>
+  <text x="93" y="577" text-anchor="middle" class="sf-lbl" font-size="13">(F) Atlas closure</text>
+  <!-- arrow 610→626 -->
+  <path d="M 93 610 V 626" class="sf-edge" marker-end="url(#so-a)"/>
+
+  <rect x="186" y="536" width="58" height="22" rx="3" class="sf-box sf-ok"/>
+  <text x="215" y="551" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">PASS</text>
+  <text x="252" y="551" class="sf-sub" font-size="11">|&#x394;<tspan class="sf-math">E</tspan><tspan dy="3" font-size="8">cl.</tspan><tspan dy="-3">| &#x2264; <tspan class="sf-math">&#x03C4;</tspan><tspan dy="3" font-size="8">jump</tspan><tspan dy="-3"> (or reconcile window) — commit</tspan></text>
+
+  <rect x="186" y="562" width="58" height="22" rx="3" class="sf-box"/>
+  <text x="215" y="577" text-anchor="middle" class="sf-warn-txt" font-size="11" font-weight="700">WARN</text>
+  <text x="252" y="577" class="sf-sub" font-size="11"><tspan class="sf-math">&#x03C4;</tspan><tspan dy="3" font-size="8">jump</tspan><tspan dy="-3"> &lt; |&#x394;<tspan class="sf-math">E</tspan><tspan dy="3" font-size="8">cl.</tspan><tspan dy="-3">| &#x2264; <tspan class="sf-math">f</tspan><tspan dy="3" font-size="8">rej</tspan><tspan dy="-3">&#xB7;<tspan class="sf-math">&#x03C4;</tspan><tspan dy="3" font-size="8">jump</tspan><tspan dy="-3"> — commit; warn flag set</tspan></tspan></text>
+
+  <rect x="186" y="588" width="58" height="22" rx="3" class="sf-box sf-fail"/>
+  <text x="215" y="603" text-anchor="middle" class="sf-rej-txt" font-size="11" font-weight="700">REJECT</text>
+  <text x="252" y="603" class="sf-sub" font-size="11">|&#x394;<tspan class="sf-math">E</tspan><tspan dy="3" font-size="8">cl.</tspan><tspan dy="-3">| &gt; <tspan class="sf-math">f</tspan><tspan dy="3" font-size="8">rej</tspan><tspan dy="-3">&#xB7;<tspan class="sf-math">&#x03C4;</tspan><tspan dy="3" font-size="8">jump</tspan><tspan dy="-3"> — restore <tspan class="sf-math">u</tspan><tspan dy="-3" font-size="8">n</tspan><tspan dy="3">; halve <tspan class="sf-math">&#x394;t</tspan>*; BDF2&#x2192;BDF1</tspan></tspan></text>
+
+  <!-- ═══ Commit y=626..648 ════════════════════════════════════════ -->
+  <rect x="8" y="626" width="170" height="22" rx="4" class="sf-box sf-ok"/>
+  <text x="93" y="641" text-anchor="middle" class="sf-lbl" font-size="13">Commit</text>
+
+</svg>
+</div>

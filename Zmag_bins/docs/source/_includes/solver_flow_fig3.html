@@ -1,0 +1,101 @@
+<div class="solver-flow-svg solver-flow-svg--detail" role="img" aria-label="Phase D substages">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 700">
+  <defs>
+    <marker id="f3-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,5 0,10" style="fill: var(--color-foreground-muted, #6b6f76); stroke: none;"/>
+    </marker>
+  </defs>
+
+  <!--
+    Main column: cx=240, box x=120..360 (w=240)
+    Note panel:  x=440..690 (w=250, cx=565)
+    Diamond half-widths ±110 from cx → left tip 130, right tip 350
+
+    y layout:
+      Top diamond ‖F‖≤g_res:   cy=60   (22..98)
+      D1 box:                   y=114..174  (h=60, 2 lines)
+      λ-found diamond:          cy=230  (192..268)
+      Damped-state box:         y=284..340
+      Restore-trial box:        y=370..426
+      D2 diamond:               cy=480  (442..518)
+      D3 box:                   y=534..590  (h=56, 2 lines)
+      Proceed box:              y=612..660
+  -->
+
+  <!-- Top diamond: ‖F‖ ≤ g_res? cy=60 -->
+  <polygon points="240,22 350,60 240,98 130,60" class="sf-diamond"/>
+  <text x="240" y="55" text-anchor="middle" class="sf-lbl" font-size="13">&#x2016;<tspan class="sf-math">F</tspan>&#x2016; &#x2264; <tspan class="sf-math">g</tspan><tspan dy="3" font-size="8">res</tspan><tspan dy="-3"> ?</tspan></text>
+  <text x="240" y="75" text-anchor="middle" class="sf-br" font-size="11">at <tspan class="sf-math">&#x03BB;</tspan> = 1</text>
+
+  <!-- YES: right bypass → drop all the way → enter proceed from right -->
+  <path d="M 350 60 H 430 V 636 H 360" class="sf-edge" marker-end="url(#f3-a)"/>
+  <text x="436" y="54" class="sf-br" font-size="11">yes</text>
+
+  <!-- NO: straight down to D1 -->
+  <path d="M 240 98 V 114" class="sf-edge" marker-end="url(#f3-a)"/>
+  <text x="247" y="110" class="sf-br" font-size="11">no</text>
+
+  <!-- D1: λ-line search (h=60, 2 lines) -->
+  <rect x="120" y="114" width="240" height="60" rx="6" class="sf-box sf-accent"/>
+  <text x="240" y="139" text-anchor="middle" class="sf-lbl" font-size="13">D1: <tspan class="sf-math">&#x03BB;</tspan>-line search</text>
+  <text x="240" y="161" text-anchor="middle" class="sf-sub" font-size="11"><tspan class="sf-math">&#x03BB;</tspan> = &#xBD;, &#xBC;, &#x2026;  (no SNES re-solve)</text>
+  <path d="M 240 174 V 192" class="sf-edge" marker-end="url(#f3-a)"/>
+
+  <!-- λ found? diamond cy=230 -->
+  <polygon points="240,192 350,230 240,268 130,230" class="sf-diamond"/>
+  <text x="240" y="234" text-anchor="middle" class="sf-sub" font-size="11"><tspan class="sf-math">&#x03BB;</tspan> with &#x2016;<tspan class="sf-math">F</tspan>&#x2016; &#x2264; <tspan class="sf-math">g</tspan><tspan dy="3" font-size="8">res</tspan><tspan dy="-3"> ?</tspan></text>
+
+  <!-- YES → damped state -->
+  <path d="M 240 268 V 284" class="sf-edge" marker-end="url(#f3-a)"/>
+  <text x="247" y="279" class="sf-br" font-size="11">yes</text>
+
+  <!-- Retain damped state -->
+  <rect x="120" y="284" width="240" height="56" rx="6" class="sf-box sf-ok"/>
+  <text x="240" y="317" text-anchor="middle" class="sf-sub" font-size="11">retain damped state</text>
+
+  <!-- Damped state → proceed (bypass, right edge → x=430, drop to y=636) -->
+  <path d="M 360 312 H 430 V 636 H 360" class="sf-edge" marker-end="url(#f3-a)"/>
+
+  <!-- NO from λ diamond → go left, restore trial -->
+  <path d="M 130 230 H 70 V 398 H 120" class="sf-edge" marker-end="url(#f3-a)"/>
+  <text x="76" y="224" class="sf-br" font-size="11">no</text>
+
+  <!-- Restore full trial (λ=1) -->
+  <rect x="120" y="370" width="240" height="56" rx="6" class="sf-box"/>
+  <text x="240" y="403" text-anchor="middle" class="sf-sub" font-size="11">restore full trial (<tspan class="sf-math">&#x03BB;</tspan> = 1)</text>
+  <path d="M 240 426 V 442" class="sf-edge" marker-end="url(#f3-a)"/>
+
+  <!-- D2: merit accept? diamond cy=480 -->
+  <polygon points="240,442 350,480 240,518 130,480" class="sf-diamond"/>
+  <text x="240" y="484" text-anchor="middle" class="sf-sub" font-size="11">D2: merit accept?</text>
+
+  <!-- YES → proceed -->
+  <path d="M 240 518 V 612" class="sf-edge" marker-end="url(#f3-a)"/>
+  <text x="247" y="534" class="sf-br" font-size="11">yes</text>
+
+  <!-- NO → D3 (go left) -->
+  <path d="M 130 480 H 70 V 554 H 120" class="sf-edge" marker-end="url(#f3-a)"/>
+  <text x="76" y="474" class="sf-br" font-size="11">no</text>
+
+  <!-- D3: continue without rejection (h=56, 2 lines) -->
+  <rect x="120" y="534" width="240" height="56" rx="6" class="sf-box sf-accent"/>
+  <text x="240" y="558" text-anchor="middle" class="sf-lbl" font-size="13">D3: continue</text>
+  <text x="240" y="578" text-anchor="middle" class="sf-sub" font-size="11">no rejection</text>
+
+  <!-- D3 → proceed -->
+  <path d="M 240 590 V 612" class="sf-edge" marker-end="url(#f3-a)"/>
+
+  <!-- Proceed to phase (E) -->
+  <rect x="120" y="612" width="240" height="48" rx="6" class="sf-box sf-ok"/>
+  <text x="240" y="641" text-anchor="middle" class="sf-lbl" font-size="13">Proceed to phase (E)</text>
+
+  <!-- Note panel -->
+  <rect x="440" y="108" width="250" height="162" rx="6" class="sf-box sf-note"/>
+  <text x="565" y="131" text-anchor="middle" class="sf-lbl" font-size="13">State blend</text>
+  <text x="565" y="154" text-anchor="middle" class="sf-sub" font-size="11"><tspan class="sf-math">q</tspan> &#x2190; <tspan class="sf-math">q</tspan><tspan dy="-4" font-size="8">n</tspan><tspan dy="4"> + <tspan class="sf-math">&#x03BB;</tspan> (</tspan><tspan class="sf-math">q</tspan><tspan dy="-4" font-size="8">trial</tspan><tspan dy="4"> &#x2212; </tspan><tspan class="sf-math">q</tspan><tspan dy="-4" font-size="8">n</tspan><tspan dy="4">)</tspan></text>
+  <text x="565" y="176" text-anchor="middle" class="sf-sub" font-size="11">fixed &#x394;t&#x2217;;  no SNES re-solve</text>
+  <text x="565" y="198" text-anchor="middle" class="sf-sub" font-size="11"><tspan class="sf-math">&#x03BB;</tspan> &#x2208; { &#xBD;, &#xBC;, &#x2026; }</text>
+  <text x="565" y="220" text-anchor="middle" class="sf-sub" font-size="11">D3 continues — does not reject</text>
+
+</svg>
+</div>

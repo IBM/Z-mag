@@ -1,0 +1,83 @@
+<div class="solver-flow-svg solver-flow-svg--phase" role="img" aria-label="Phase F — Atlas closure">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 380">
+  <defs>
+    <marker id="pf-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-foreground-muted, #6b6f76)" stroke="none"/>
+    </marker>
+    <marker id="pf-r" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-admonition-title--danger, #ff5252)" stroke="none"/>
+    </marker>
+  </defs>
+
+  <!--
+    viewBox 560 × 380   cx-spine = 230   (matches phases B/C/D/E)
+    Spine boxes  x=30..390  w=360
+    Diamond  half-w=110  left-tip=120  right-tip=340  ONE label line
+
+    REJECT pill: right of diamond  x=362..422  (right-tip 340 + 22px arrow gap)
+      arrow: (340,cy) → H 362  marker-end pf-r
+
+    y layout  (all arrows ≥ 18 px)
+      Title              6..34    h=28
+      ↓20                34→54
+      Record E_gate      54..86   h=32
+      ↓20                86→106
+      Reconcile DOFs    106..138  h=32
+      ↓20               138→158
+      Recompute E_gate  158..190  h=32
+      ↓20               190→210
+      |ΔE_cl| ≤ tol? ◇  top=210  cy=232  bot=254  half-w=110
+        no  → (340,232) H 362 → REJECT pill
+        yes ↓ (230,254) → 254→274 arrow → Accept box
+      Accept box        274..322  h=48   sf-ok
+  -->
+
+  <!-- Title bar -->
+  <rect x="10" y="6" width="540" height="28" rx="5" class="sf-box sf-accent"/>
+  <text x="280" y="25" text-anchor="middle" class="sf-lbl" font-size="13">(F) Atlas closure — <tspan class="sf-tt" font-size="11">_apply_closure_gate</tspan></text>
+
+  <!-- ↓ Title → Record E_gate -->
+  <path d="M 230 34 V 54" class="sf-edge" marker-end="url(#pf-a)"/>
+
+  <!-- Record E_gate before closure -->
+  <rect x="30" y="54" width="360" height="32" rx="5" class="sf-box"/>
+  <text x="210" y="75" text-anchor="middle" class="sf-lbl" font-size="13">Record <tspan class="sf-math">E</tspan><tspan dy="3" font-size="8">gate</tspan><tspan dy="-3"> before closure</tspan></text>
+
+  <!-- ↓ Record → Reconcile -->
+  <path d="M 230 86 V 106" class="sf-edge" marker-end="url(#pf-a)"/>
+
+  <!-- Reconcile inactive chart DOFs -->
+  <rect x="30" y="106" width="360" height="32" rx="5" class="sf-box"/>
+  <text x="210" y="127" text-anchor="middle" class="sf-lbl" font-size="13">Reconcile inactive chart DOFs</text>
+
+  <!-- ↓ Reconcile → Recompute -->
+  <path d="M 230 138 V 158" class="sf-edge" marker-end="url(#pf-a)"/>
+
+  <!-- Recompute E_gate after closure -->
+  <rect x="30" y="158" width="360" height="32" rx="5" class="sf-box"/>
+  <text x="210" y="179" text-anchor="middle" class="sf-lbl" font-size="13">Recompute <tspan class="sf-math">E</tspan><tspan dy="3" font-size="8">gate</tspan><tspan dy="-3"> after closure</tspan></text>
+
+  <!-- ↓ Recompute → diamond -->
+  <path d="M 230 190 V 210" class="sf-edge" marker-end="url(#pf-a)"/>
+
+  <!-- |ΔE_closure| ≤ tol?  cy=232  half-w=110  half-h=22 -->
+  <polygon points="230,210 340,232 230,254 120,232" class="sf-diamond"/>
+  <text x="230" y="236" text-anchor="middle" class="sf-lbl" font-size="12">|&#x394;<tspan class="sf-math">E</tspan><tspan dy="3" font-size="8">closure</tspan><tspan dy="-3">| &#x2264; tol ?</tspan></text>
+
+  <!-- no → right → REJECT pill -->
+  <path d="M 340 232 H 380" class="sf-edge-rej" marker-end="url(#pf-r)"/>
+  <text x="343" y="226" class="sf-br" font-size="10">no</text>
+  <rect x="382" y="219" width="60" height="26" rx="3" class="sf-box sf-fail"/>
+  <text x="412" y="237" text-anchor="middle" class="sf-rej-txt" font-size="11" font-weight="700">REJECT</text>
+
+  <!-- yes ↓ → Accept -->
+  <path d="M 230 254 V 274" class="sf-edge" marker-end="url(#pf-a)"/>
+  <text x="237" y="270" class="sf-br" font-size="10">yes</text>
+
+  <!-- Accept attempt -->
+  <rect x="80" y="274" width="300" height="48" rx="5" class="sf-box sf-ok"/>
+  <text x="230" y="298" text-anchor="middle" class="sf-lbl" font-size="13">Accept attempt</text>
+  <text x="230" y="315" text-anchor="middle" class="sf-sub" font-size="11">state committed · &#x394;t* updated</text>
+
+</svg>
+</div>

@@ -1,0 +1,12 @@
+# Python runtime dependencies for Z-mag stereographic dynamic solvers (indicative).
+# Prefer conda-forge packages where available; see docs/source/installation.rst.
+
+numpy
+scipy
+matplotlib
+mpi4py
+numba
+meshio
+gmsh
+
+# FEniCSx / DOLFINx 0.11, PETSc, adios4dolfinx: install via conda (see installation.rst).

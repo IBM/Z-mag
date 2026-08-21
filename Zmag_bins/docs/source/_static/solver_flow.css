@@ -1,0 +1,171 @@
+/* Solver flowcharts — compact SVG typography.
+   Font sizes are set as SVG user-unit attributes on each <text> element
+   so they scale with the viewBox when the SVG fills its container.      */
+
+.solver-flow-figure-block {
+    margin: 1.25rem 0 1.75rem;
+}
+
+.solver-flow-svg {
+    width: 100%;
+    overflow: visible;
+    margin: 0.25rem 0;
+}
+
+.solver-flow-svg svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    font-family: var(--font-stack, system-ui, sans-serif);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Figure 1 — driver strip with outcome badges */
+.solver-flow-svg--driver svg {
+    max-width: 42rem;
+}
+
+/* Figure 2 — overview */
+.solver-flow-svg--overview svg {
+    max-width: 44rem;
+}
+
+/* Figures — per-phase */
+.solver-flow-svg--phase svg {
+    max-width: 42rem;
+}
+
+/* Detail figures */
+.solver-flow-svg--detail svg {
+    max-width: 48rem;
+}
+
+/* Outcomes overview figure — full content width */
+.solver-flow-svg--outcomes svg {
+    max-width: 56rem;
+}
+
+/* ── Shape fills / strokes ─────────────────────────────────────────── */
+
+.solver-flow-svg .sf-box {
+    fill: var(--color-background-secondary);
+    stroke: var(--color-foreground-border);
+    stroke-width: 1.4;
+}
+
+.solver-flow-svg .sf-accent {
+    fill: var(--color-background-hover);
+    stroke: var(--color-brand-primary);
+    stroke-width: 1.4;
+}
+
+.solver-flow-svg .sf-ok {
+    fill: var(--color-background-hover);
+    stroke: var(--color-admonition-title--hint, #00c852);
+    stroke-width: 1.6;
+}
+
+.solver-flow-svg .sf-fail {
+    fill: var(--color-background-hover);
+    stroke: var(--color-admonition-title--danger, #ff5252);
+    stroke-width: 1.6;
+}
+
+.solver-flow-svg .sf-diamond {
+    fill: var(--color-background-secondary);
+    stroke: var(--color-foreground-muted);
+    stroke-width: 1.4;
+}
+
+.solver-flow-svg .sf-ref {
+    fill: var(--color-background-primary);
+    stroke: var(--color-brand-content, var(--color-link));
+    stroke-width: 1.4;
+    stroke-dasharray: 5 3;
+}
+
+/* Side-note panel (dashed border) */
+.solver-flow-svg .sf-note {
+    fill: var(--color-background-primary);
+    stroke: var(--color-foreground-border);
+    stroke-width: 1;
+    stroke-dasharray: 4 3;
+}
+
+/* ── Typography ────────────────────────────────────────────────────── */
+
+.solver-flow-svg .sf-lbl {
+    fill: var(--color-foreground-primary);
+    font-weight: 600;
+}
+
+/* Italic serif for math symbols (MathJax does not render inside SVG) */
+.solver-flow-svg .sf-math {
+    font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math",
+                 "Times New Roman", Times, serif;
+    font-style: italic;
+    font-weight: normal;
+    fill: var(--color-foreground-primary);
+}
+
+/* Monospace-style for code names */
+.solver-flow-svg .sf-tt {
+    font-family: var(--font-stack--monospace, "SFMono-Regular", Consolas,
+                     "Liberation Mono", Menlo, monospace);
+    font-style: normal;
+    font-weight: 600;
+    fill: var(--color-foreground-primary);
+}
+
+.solver-flow-svg .sf-sub {
+    fill: var(--color-foreground-secondary);
+}
+
+.solver-flow-svg .sf-br {
+    fill: var(--color-foreground-secondary);
+    font-style: italic;
+}
+
+/* Outcome annotation colours — override sf-sub fill */
+.solver-flow-svg .sf-ok-txt {
+    fill: var(--color-admonition-title--hint, #00a846);
+    font-weight: 500;
+}
+.solver-flow-svg .sf-warn-txt {
+    fill: var(--color-admonition-title--warning, #c47d00);
+    font-weight: 500;
+}
+.solver-flow-svg .sf-rej-txt {
+    fill: var(--color-admonition-title--danger, #d93025);
+    font-weight: 500;
+}
+
+/* ── Edges ─────────────────────────────────────────────────────────── */
+
+.solver-flow-svg .sf-edge {
+    stroke: var(--color-foreground-muted);
+    stroke-width: 1.6;
+    fill: none;
+}
+
+.solver-flow-svg .sf-edge-rej {
+    stroke: var(--color-admonition-title--danger, #ff5252);
+    stroke-width: 1.6;
+    fill: none;
+    stroke-dasharray: 5 3;
+}
+
+/* NOTE: .sf-mk and .sf-mk-rej are intentionally NOT defined here.
+   Marker <polygon> elements live in a separate rendering context inside
+   <marker> and do not inherit CSS class styles from the parent SVG tree.
+   Instead, fill is set with inline fill="..." attributes in the SVG markup. */
+
+/* ── Figure caption ────────────────────────────────────────────────── */
+
+.solver-flow-figure-block p {
+    margin: 0.35rem 0 0;
+    font-size: 0.92rem;
+    line-height: 1.4;
+}

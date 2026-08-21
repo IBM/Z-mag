@@ -1,0 +1,73 @@
+<div class="solver-flow-svg solver-flow-svg--phase" role="img" aria-label="Phase C — Atlas radius guard">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 322">
+  <defs>
+    <marker id="pc-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-foreground-muted, #6b6f76)" stroke="none"/>
+    </marker>
+    <marker id="pc-r" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-admonition-title--danger, #ff5252)" stroke="none"/>
+    </marker>
+  </defs>
+
+  <!--
+    Canvas 560 × 300   cx-spine = 230
+    Spine boxes: x=60..400 (w=340)  — matches phase B
+    Diamond: half-w=110 → left=120 right=340  cy=122
+
+    y layout
+      Title        6..34    h=28
+      ↓20          34→54
+      Compute      54..86   h=32
+      ↓20          86→106
+      Diamond      top=106 cy=128 bot=150   half-w=110 half-h=22
+        no → H right tip (340,128) → H 382 → REJECT pill
+        yes → down 150→192  (42px: "yes" at 158, soft-warn at 170, arrow ends at 192)
+      Snapshot     192..236 h=44
+      ↓20          236→256
+      Proceed (D)  256..288 h=32  sf-ok
+  -->
+
+  <!-- Title bar -->
+  <rect x="10" y="6" width="540" height="28" rx="5" class="sf-box sf-accent"/>
+  <text x="280" y="25" text-anchor="middle" class="sf-lbl" font-size="13">(C) Atlas radius guard — <tspan class="sf-tt" font-size="11">_refresh_attempt_energies</tspan></text>
+
+  <!-- ↓ Title → Compute -->
+  <path d="M 230 34 V 54" class="sf-edge" marker-end="url(#pc-a)"/>
+
+  <!-- Compute r_max -->
+  <rect x="60" y="54" width="340" height="32" rx="5" class="sf-box"/>
+  <text x="230" y="75" text-anchor="middle" class="sf-lbl" font-size="13">Compute <tspan class="sf-math">r</tspan><tspan dy="3" font-size="9">max</tspan><tspan dy="-3"> = max<tspan dy="3" font-size="9">i</tspan><tspan dy="-3"> min(|<tspan class="sf-math">q</tspan><tspan dy="3" font-size="9">A,i</tspan><tspan dy="-3">|, |<tspan class="sf-math">q</tspan><tspan dy="3" font-size="9">B,i</tspan><tspan dy="-3">|)</tspan></tspan></tspan></text>
+
+  <!-- ↓ Compute → Diamond -->
+  <path d="M 230 86 V 106" class="sf-edge" marker-end="url(#pc-a)"/>
+
+  <!-- Diamond: r_max ≤ g_hard?  cy=128  half-w=110 -->
+  <polygon points="230,106 340,128 230,150 120,128" class="sf-diamond"/>
+  <text x="230" y="131" text-anchor="middle" class="sf-lbl" font-size="11"><tspan class="sf-math">r</tspan><tspan dy="3" font-size="9">max</tspan><tspan dy="-3"> &#x2264; <tspan class="sf-math">g</tspan><tspan dy="3" font-size="9">hard</tspan><tspan dy="-3"> ?</tspan></tspan></text>
+
+  <!-- no → right → REJECT pill (matching phase B style) -->
+  <path d="M 340 128 H 382" class="sf-edge-rej" marker-end="url(#pc-r)"/>
+  <text x="344" y="122" class="sf-br" font-size="10">no</text>
+  <rect x="384" y="115" width="60" height="26" rx="3" class="sf-box sf-fail"/>
+  <text x="414" y="133" text-anchor="middle" class="sf-rej-txt" font-size="11" font-weight="700">REJECT</text>
+  <text x="448" y="133" text-anchor="start" class="sf-sub" font-size="10"> — cut &#x394;t*</text>
+
+  <!-- yes ↓ to Snapshot (42px arrow — room for "yes" and soft-warn note) -->
+  <path d="M 230 150 V 192" class="sf-edge" marker-end="url(#pc-a)"/>
+  <text x="238" y="160" class="sf-br" font-size="10">yes</text>
+  <text x="238" y="172" class="sf-sub" font-size="10">(soft warn if <tspan class="sf-math">r</tspan><tspan dy="3" font-size="9">max</tspan><tspan dy="-3"> &gt; <tspan class="sf-math">r</tspan><tspan dy="3" font-size="9">guard</tspan><tspan dy="-3">)</tspan></tspan></text>
+
+  <!-- Snapshot energies: h=44, one subtitle line -->
+  <rect x="60" y="192" width="340" height="44" rx="5" class="sf-box sf-ok"/>
+  <text x="230" y="212" text-anchor="middle" class="sf-lbl" font-size="13">Snapshot energies</text>
+  <text x="230" y="229" text-anchor="middle" class="sf-sub" font-size="11"><tspan class="sf-math">E</tspan><tspan dy="3" font-size="9">split</tspan><tspan dy="-3">, <tspan class="sf-math">E</tspan><tspan dy="3" font-size="9">phys</tspan><tspan dy="-3"> · re-run after backtracking in (D)/(E)</tspan></tspan></text>
+
+  <!-- ↓ Snapshot → Proceed -->
+  <path d="M 230 236 V 256" class="sf-edge" marker-end="url(#pc-a)"/>
+
+  <!-- Proceed to (D) -->
+  <rect x="80" y="256" width="300" height="32" rx="5" class="sf-box sf-ok"/>
+  <text x="230" y="277" text-anchor="middle" class="sf-lbl" font-size="13">Proceed to (D)</text>
+
+</svg>
+</div>

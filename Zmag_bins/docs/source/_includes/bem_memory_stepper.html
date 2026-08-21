@@ -1,0 +1,230 @@
+<div class="bem-stepper" id="bem-mem-stepper" role="region" aria-label="BEM memory layout">
+  <h4>BEM: memory layout &amp; solve buffers</h4>
+  <p class="bem-stepper-sub">
+    How the dense row block is stored in RAM, how the C++ kernel writes directly into it,
+    and what buffers are allocated once for the solve phase.
+  </p>
+  <div class="bem-stepper-controls">
+    <button type="button" id="bem-mem-prev" aria-label="Previous step">&larr; Prev</button>
+    <button type="button" id="bem-mem-next" aria-label="Next step">Next &rarr;</button>
+    <span class="bem-step-counter" id="bem-mem-counter" aria-live="polite"></span>
+  </div>
+  <div class="bem-stepper-panel">
+    <h5 id="bem-mem-title"></h5>
+    <p class="bem-step-text" id="bem-mem-text"></p>
+    <div class="bem-stepper-eq-block" id="bem-mem-eq-block">
+      <span class="bem-eq-label">key relation</span>
+      <code id="bem-mem-eq"></code>
+    </div>
+    <div id="bem-mem-svg-wrap"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+function pal(){
+  var s=getComputedStyle(document.documentElement);
+  var g=function(v,fb){var r=s.getPropertyValue(v).trim();return r||fb;};
+  return {
+    bg :g("--color-background","#1a1b1e"),
+    bg2:g("--color-background-secondary","#26272b"),
+    bdr:g("--color-background-border","#3a3c42"),
+    fg :g("--color-foreground","#e1e2e6"),
+    mut:g("--color-foreground-muted","#8b8fa8"),
+    lnk:g("--color-link","#6ea8fe"),
+    r0:"#4da6ff", r1:"#5dbd73", r2:"#f0a050",
+    hi:"#e06c75",
+  };
+}
+
+var NS="http://www.w3.org/2000/svg";
+function el(tag,a){
+  var e=document.createElementNS(NS,tag);
+  for(var k in a) if(a.hasOwnProperty(k)) e.setAttribute(k,a[k]);
+  return e;
+}
+function mksvg(vw,vh){
+  var s=el("svg",{viewBox:"0 0 "+vw+" "+vh,
+    style:"width:100%;height:auto;max-height:300px;display:block;overflow:visible;"});
+  s.setAttribute("xmlns",NS); return s;
+}
+function rect(p,x,y,w,h,fill,stroke,extra){
+  var r=el("rect",Object.assign({x:x,y:y,width:w,height:h,fill:fill,
+    stroke:stroke||"none","stroke-width":"1.5",rx:"3"},extra||{}));
+  p.appendChild(r); return r;
+}
+function txt(p,str,x,y,st){
+  var t=el("text",{x:x,y:y});
+  t.setAttribute("style",st||"");
+  t.textContent=str;
+  p.appendChild(t); return t;
+}
+function arrow(p,x1,y1,x2,y2,col,sw){
+  var g=el("g",{});
+  var l=el("line",{x1:x1,y1:y1,x2:x2,y2:y2,stroke:col,"stroke-width":sw||1.5});
+  g.appendChild(l);
+  var a=Math.atan2(y2-y1,x2-x1),S=7;
+  var poly=el("polygon",{points:
+    (x2-S*Math.cos(a-0.4))+","+(y2-S*Math.sin(a-0.4))+" "+
+    x2+","+y2+" "+
+    (x2-S*Math.cos(a+0.4))+","+(y2-S*Math.sin(a+0.4)),fill:col});
+  g.appendChild(poly); p.appendChild(g); return g;
+}
+function ha(hex,a){
+  var c=document.createElement("canvas").getContext("2d");
+  c.fillStyle=hex;
+  return "rgba("+parseInt(c.fillStyle.slice(1,3),16)+","+
+    parseInt(c.fillStyle.slice(3,5),16)+","+
+    parseInt(c.fillStyle.slice(5,7),16)+","+a+")";
+}
+
+/* ── Step 1: row-major block layout ── */
+function drawLayout(){
+  var p=pal(), S=mksvg(560,220);
+  rect(S,0,0,560,220,p.bg);
+
+  /* main block */
+  var mx=60, my=28, mw=420, mh=110;
+  rect(S,mx,my,mw,mh,ha(p.r1,0.18),p.r1);
+  txt(S,"B⁽ʳ⁾   float64, C-contiguous",mx+mw/2,my+32,
+    "fill:"+p.r1+";font-size:13px;font-weight:600;text-anchor:middle;");
+  txt(S,"shape: (nᵣ,  N_bnd)",mx+mw/2,my+54,
+    "fill:"+p.fg+";font-size:11.5px;text-anchor:middle;");
+
+  /* row arrow */
+  var arx=mx-28;
+  arrow(S,arx,my,arx,my+mh,p.mut,1.2);
+  txt(S,"nᵣ",arx-6,my+mh/2+4,"fill:"+p.mut+";font-size:10px;text-anchor:end;");
+
+  /* col arrow */
+  var ary=my+mh+16;
+  arrow(S,mx,ary,mx+mw,ary,p.mut,1.2);
+  txt(S,"N_bnd  (all global boundary nodes)",mx+mw/2,ary+15,
+    "fill:"+p.mut+";font-size:10px;text-anchor:middle;");
+
+  /* formula */
+  txt(S,"bytes(B⁽ʳ⁾)  =  8[float64] × nᵣ × N_bnd",mx+mw/2,my+84,
+    "fill:"+p.lnk+";font-size:11.5px;font-weight:600;text-anchor:middle;");
+
+  txt(S,"Each row = one owned boundary node.  Each column = one global boundary node.",280,210,
+    "fill:"+p.mut+";font-size:10px;text-anchor:middle;font-style:italic;");
+  return S;
+}
+
+/* ── Step 2: zero-copy C++ fill ── */
+function drawZeroCopy(){
+  var p=pal(), S=mksvg(560,220);
+  rect(S,0,0,560,220,p.bg);
+
+  /* Python: allocate buffer */
+  var bx=20, by=30, bw=160, bh=56;
+  rect(S,bx,by,bw,bh,p.bg2,p.bdr);
+  txt(S,"Python",bx+8,by+18,"fill:"+p.mut+";font-size:10px;");
+  txt(S,"output_buffer =",bx+8,by+34,"fill:"+p.fg+";font-size:10px;font-family:monospace;");
+  txt(S,"np.zeros((nᵣ, N_bnd))",bx+8,by+50,"fill:"+p.fg+";font-size:10px;font-family:monospace;");
+
+  /* arrow: raw pointer */
+  arrow(S,bx+bw+4,by+bh/2,bx+bw+80,by+bh/2,p.lnk,1.5);
+  txt(S,"double*",bx+bw+42,by+bh/2-8,"fill:"+p.lnk+";font-size:10px;text-anchor:middle;");
+
+  /* C++ kernel */
+  var cx=bx+bw+84, cw=180, ch=56;
+  rect(S,cx,by,cw,ch,ha(p.hi,0.15),p.hi);
+  txt(S,"assemble_direct  (C++)",cx+cw/2,by+18,"fill:"+p.hi+";font-size:10px;font-weight:600;text-anchor:middle;font-family:monospace;");
+  txt(S,"add_entry(i, j, v):",cx+cw/2,by+34,"fill:"+p.fg+";font-size:10px;text-anchor:middle;font-family:monospace;");
+  txt(S,"ptr[i×N+j] += v",cx+cw/2,by+50,"fill:"+p.fg+";font-size:10px;text-anchor:middle;font-family:monospace;");
+
+  /* arrow: writes in-place */
+  arrow(S,cx+cw/2,by+ch+4,cx+cw/2,120,p.r1,1.5);
+  txt(S,"writes in-place",cx+cw/2+48,by+ch+20,"fill:"+p.r1+";font-size:10px;");
+
+  /* result buffer */
+  rect(S,20,122,520,48,ha(p.r1,0.18),p.r1);
+  txt(S,"output_buffer — filled in-place, no copy",280,144,
+    "fill:"+p.r1+";font-size:12px;font-weight:600;text-anchor:middle;");
+  txt(S,"no intermediate std::vector allocated",280,160,
+    "fill:"+p.fg+";font-size:10.5px;text-anchor:middle;");
+
+  txt(S,"Debug path (bem_cpp_debug): dict API, extra checks — testing only.",280,206,
+    "fill:"+p.mut+";font-size:10px;font-style:italic;text-anchor:middle;");
+  return S;
+}
+
+/* ── Step 3: solve-phase persistent buffers ── */
+function drawCache(){
+  var p=pal(), S=mksvg(560,220);
+  rect(S,0,0,560,220,p.bg);
+
+  txt(S,"initialize_bem_cache()  —  called once after assembly",280,18,
+    "fill:"+p.fg+";font-size:12px;font-weight:600;text-anchor:middle;");
+
+  /* BEM block (read-only) */
+  rect(S,20,28,340,46,ha(p.r1,0.2),p.r1);
+  txt(S,"B⁽ʳ⁾   (nᵣ × N_bnd)   READ ONLY",190,55,
+    "fill:"+p.r1+";font-size:11.5px;font-weight:600;text-anchor:middle;");
+
+  /* MPI layout arrays */
+  rect(S,368,28,172,46,p.bg2,p.bdr);
+  txt(S,"global_recvcounts",454,46,"fill:"+p.mut+";font-size:10px;text-anchor:middle;font-family:monospace;");
+  txt(S,"global_displs",454,62,"fill:"+p.mut+";font-size:10px;text-anchor:middle;font-family:monospace;");
+
+  /* phi0 global buffer */
+  rect(S,20,88,520,44,ha(p.r0,0.2),p.r0);
+  txt(S,"global_phi0_bnd_buffer   [N_bnd  float64]",280,114,
+    "fill:"+p.r0+";font-size:11.5px;font-weight:600;text-anchor:middle;");
+
+  /* phi1 local buffer */
+  rect(S,20,146,240,44,ha(p.r2,0.2),p.r2);
+  txt(S,"global_phi1_bnd_buffer   [nᵣ  float64]",130,172,
+    "fill:"+p.r2+";font-size:11px;font-weight:600;text-anchor:middle;");
+
+  txt(S,"B⁽ʳ⁾ is never modified after assembly.  Only the two boundary buffers are overwritten each step.",280,208,
+    "fill:"+p.mut+";font-size:10px;text-anchor:middle;font-style:italic;");
+  return S;
+}
+
+var STEPS=[
+  {title:"1. Dense row-block layout",
+   eq:"bytes(B⁽ʳ⁾)  =  8[float64] × nᵣ × N_bnd",
+   text:"Each rank stores its nᵣ owned rows as a single C-contiguous float64 NumPy array of shape (nᵣ, N_bnd). Row-major layout means that all N_bnd entries of one row are contiguous in memory, giving cache-friendly access during the fill loop.",
+   draw:drawLayout},
+  {title:"2. Zero-copy C++ fill",
+   eq:"add_entry(i, j, v)  →  output_ptr[i × N_bnd + j] += v",
+   text:"Python pre-allocates output_buffer and passes its raw memory address to the C++ routine assemble_direct. The routine writes every entry directly into that buffer — no intermediate container is allocated. Only the pointer crosses the language boundary; the matrix data is never duplicated.",
+   draw:drawZeroCopy},
+  {title:"3. Persistent solve buffers",
+   eq:"phi1_local = np.dot(B⁽ʳ⁾, global_phi0_bnd_buffer)",
+   text:"initialize_bem_cache allocates three persistent arrays: the MPI layout arrays global_recvcounts and global_displs for MPI_Allgatherv; global_phi0_bnd_buffer (length N_bnd) to hold the assembled global φ₀ vector; and global_phi1_bnd_buffer (length nᵣ) for the local matrix–vector product result. These are reused at every time-step without reallocation.",
+   draw:drawCache},
+];
+
+var step=0;
+var wrap  =document.getElementById("bem-mem-svg-wrap");
+var titleEl=document.getElementById("bem-mem-title");
+var textEl =document.getElementById("bem-mem-text");
+var eqEl   =document.getElementById("bem-mem-eq");
+var eqBlock=document.getElementById("bem-mem-eq-block");
+var ctr    =document.getElementById("bem-mem-counter");
+var prev   =document.getElementById("bem-mem-prev");
+var next   =document.getElementById("bem-mem-next");
+
+function render(){
+  var s=STEPS[step];
+  titleEl.textContent=s.title;
+  textEl.textContent=s.text;
+  eqEl.textContent=s.eq;
+  eqBlock.style.display=s.eq?"":"none";
+  ctr.textContent="Step "+(step+1)+" / "+STEPS.length;
+  prev.disabled=(step===0);
+  next.disabled=(step===STEPS.length-1);
+  while(wrap.firstChild) wrap.removeChild(wrap.firstChild);
+  wrap.appendChild(s.draw());
+}
+
+prev.addEventListener("click",function(){if(step>0){step--;render();}});
+next.addEventListener("click",function(){if(step<STEPS.length-1){step++;render();}});
+render();
+})();
+</script>

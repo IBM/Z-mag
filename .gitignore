@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.venv/
+venv/
+
+# Test / run outputs (never publish)
+*.xdmf
+*.h5
+*.bp
+*.npz
+output_*/
+BEM_MPI*/
+results/
+chk/
+checkpoint/
+*.log
+logs/
+
+# Local-only / not part of the public tree
+joss_paper/
+INSTALL_CLUSTER.md
+_chk_energy_np.py
+run_common_ccc.sh
+run_public_interactive.sh
+run_test_*_ccc.sh
+bem_assembler/run_py.sh
+bem_assembler/standalone
+Zmag_bins/docs/source/_archive/
+release.exclude
+release_*/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Sphinx (build locally; do not commit)
+Zmag_bins/docs/build/
+Zmag_bins/docs/.venv/
+
+# BEM C++ build tree (rebuild with bem_assembler/cpp/build.sh)
+bem_assembler/cpp/build/

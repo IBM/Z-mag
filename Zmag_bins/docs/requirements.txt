@@ -1,0 +1,5 @@
+# Self-contained docs toolchain (Furo + bibtex; Sphinx 8 avoids MathJax 4 default).
+sphinx>=7.0,<9.0
+furo>=2024.0
+sphinxcontrib-bibtex>=2.6,<3.0
+sphinx-autobuild>=2024.0

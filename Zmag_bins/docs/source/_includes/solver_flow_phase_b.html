@@ -1,0 +1,101 @@
+<div class="solver-flow-svg solver-flow-svg--phase" role="img" aria-label="Phase B — Algebraic validity">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 400">
+  <defs>
+    <marker id="pb-a" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-foreground-muted, #6b6f76)" stroke="none"/>
+    </marker>
+    <marker id="pb-r" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0,0 10,4 0,8" fill="var(--color-admonition-title--danger, #ff5252)" stroke="none"/>
+    </marker>
+  </defs>
+
+  <!--
+    Canvas 560 × 400   cx-spine = 230
+    Spine boxes: x=60..400 (w=340)
+    Diamonds:    half-w=130 half-h=28  left=100  right=360
+
+    "yes" arrows: grey sf-edge, 40px → from x=360 to x=402 (H 402)
+    Badge pills:  w=60 cx=432 (RETRY) cx=498 (REJECT)  — or single badge w=60 cx=432
+    Sub-text below badge group.
+
+    y layout (20px arrows throughout)
+      Title        6..34   h=28
+      ↓20          34→54
+      Incoming     54..86  h=32
+      ↓20          86→106
+      Diamond 1    106..162  cy=134
+        yes → REJECT pill + sub  (right of diamond)
+      ↓20          162→182
+      Diamond 2    182..238  cy=210
+        yes → RETRY | REJECT pills side by side + sub  (right of diamond)
+      ↓20          238→258
+      Compute ‖F‖  258..302  h=44
+      ↓20          302→322
+      Proceed (C)  322..354  h=32  sf-ok
+      Note line    374
+      viewBox = 400
+  -->
+
+  <!-- Title bar -->
+  <rect x="10" y="6" width="540" height="28" rx="5" class="sf-box sf-accent"/>
+  <text x="280" y="25" text-anchor="middle" class="sf-lbl" font-size="13">(B) Algebraic validity — <tspan class="sf-tt" font-size="11">_validate_algebraic_solve</tspan></text>
+
+  <!-- Incoming from (A) -->
+  <path d="M 230 34 V 54" class="sf-edge" marker-end="url(#pb-a)"/>
+  <rect x="60" y="54" width="340" height="32" rx="5" class="sf-box"/>
+  <text x="230" y="75" text-anchor="middle" class="sf-lbl" font-size="13">Read <tspan class="sf-tt" font-size="11">snes_reason</tspan>, <tspan class="sf-tt" font-size="11">ksp_reason</tspan></text>
+
+  <!-- ── Diamond 1: min(snes,ksp) < 0 ? ── -->
+  <path d="M 230 86 V 106" class="sf-edge" marker-end="url(#pb-a)"/>
+  <polygon points="230,106 360,134 230,162 100,134" class="sf-diamond"/>
+  <text x="230" y="129" text-anchor="middle" class="sf-lbl" font-size="11">min(snes, ksp) reason &lt; 0</text>
+  <text x="230" y="144" text-anchor="middle" class="sf-lbl" font-size="11">(SNES / KSP diverged)?</text>
+
+  <!-- yes (grey arrow, 40px) → REJECT pill + subtitle -->
+  <path d="M 360 134 H 402" class="sf-edge" marker-end="url(#pb-a)"/>
+  <text x="362" y="128" class="sf-br" font-size="10">yes</text>
+  <rect x="404" y="121" width="60" height="26" rx="3" class="sf-box sf-fail"/>
+  <text x="434" y="139" text-anchor="middle" class="sf-rej-txt" font-size="11" font-weight="700">REJECT</text>
+  <text x="468" y="139" text-anchor="start" class="sf-sub" font-size="10"> — SNES/KSP diverged · cut &#x394;t*</text>
+
+  <!-- no → down -->
+  <path d="M 230 162 V 182" class="sf-edge" marker-end="url(#pb-a)"/>
+  <text x="238" y="176" class="sf-br" font-size="10">no</text>
+
+  <!-- ── Diamond 2: outer split not converged + enforce = true ? ── -->
+  <polygon points="230,182 360,210 230,238 100,210" class="sf-diamond"/>
+  <text x="230" y="205" text-anchor="middle" class="sf-lbl" font-size="11">outer split not converged</text>
+  <text x="230" y="220" text-anchor="middle" class="sf-lbl" font-size="11">+ enforce_outer_split = true?</text>
+
+  <!-- yes (grey arrow, 40px) → RETRY | REJECT pills side by side -->
+  <path d="M 360 210 H 402" class="sf-edge" marker-end="url(#pb-a)"/>
+  <text x="362" y="204" class="sf-br" font-size="10">yes</text>
+  <rect x="404" y="197" width="60" height="26" rx="3" class="sf-box sf-ok"/>
+  <text x="434" y="215" text-anchor="middle" class="sf-ok-txt" font-size="11" font-weight="700">RETRY</text>
+  <rect x="468" y="197" width="60" height="26" rx="3" class="sf-box sf-fail"/>
+  <text x="498" y="215" text-anchor="middle" class="sf-rej-txt" font-size="11" font-weight="700">REJECT</text>
+  <!-- subtitles below the badge pair -->
+  <text x="434" y="234" text-anchor="middle" class="sf-sub" font-size="10">escalate</text>
+  <text x="434" y="245" text-anchor="middle" class="sf-sub" font-size="10">outer cap</text>
+  <text x="498" y="234" text-anchor="middle" class="sf-sub" font-size="10">cap limit</text>
+  <text x="498" y="245" text-anchor="middle" class="sf-sub" font-size="10">→ cut &#x394;t*</text>
+
+  <!-- no → down -->
+  <path d="M 230 238 V 258" class="sf-edge" marker-end="url(#pb-a)"/>
+  <text x="238" y="252" class="sf-br" font-size="10">no (or enforce = false)</text>
+
+  <!-- Compute ‖F‖ and record iters -->
+  <rect x="60" y="258" width="340" height="44" rx="5" class="sf-box"/>
+  <text x="230" y="279" text-anchor="middle" class="sf-lbl" font-size="13">Compute <tspan class="sf-math">&#x2016;F&#x2016;</tspan></text>
+  <text x="230" y="295" text-anchor="middle" class="sf-sub" font-size="11">record <tspan class="sf-tt" font-size="10">snes_iters</tspan>, <tspan class="sf-tt" font-size="10">ksp_iters</tspan>, <tspan class="sf-tt" font-size="10">snes_reason</tspan></text>
+
+  <!-- Proceed to (C) -->
+  <path d="M 230 302 V 322" class="sf-edge" marker-end="url(#pb-a)"/>
+  <rect x="80" y="322" width="300" height="32" rx="5" class="sf-box sf-ok"/>
+  <text x="230" y="343" text-anchor="middle" class="sf-lbl" font-size="13">Proceed to (C)</text>
+
+  <!-- Note: SNES disallowed-reason check -->
+  <text x="230" y="374" text-anchor="middle" class="sf-br" font-size="10">&#x21B3; After (C): SNES converged with a weak reason and <tspan class="sf-math">&#x2016;F&#x2016;</tspan> still large → REJECT (handled in phase D)</text>
+
+</svg>
+</div>

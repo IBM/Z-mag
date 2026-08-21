@@ -1,0 +1,366 @@
+<div class="dci-block" id="dci-explorer" role="region" aria-label="Dual-chart initialization explorer">
+  <h4>Unit meridian: <strong>m</strong> = (0, <em>m</em><sub>y</sub>, &radic;(1 &minus; <em>m</em><sub>y</sub><sup>2</sup>))</h4>
+  <p class="dci-intro">
+    For this family on the unit sphere (x = 0, <em>m</em><sub>z</sub> &ge; 0):
+    <strong>m</strong> = (0, <em>m</em><sub>y</sub>, &radic;(1 &minus; <em>m</em><sub>y</sub><sup>2</sup>)).
+    Curves use the dynamic dual projection (forward maps plus exact-pole repair) and weights
+    <em>w</em><sub>A</sub> = &frac12;(1 &minus; <strong>m</strong>&middot;<strong>P</strong>),
+    <em>w</em><sub>B</sub> = &frac12;(1 + <strong>m</strong>&middot;<strong>P</strong>)
+    (Eq.&nbsp;89). Pole <strong>P</strong> = (0, &minus;1, 0), so <strong>m</strong>&middot;<strong>P</strong> = &minus;<em>m</em><sub>y</sub>.
+  </p>
+
+  <div class="dci-slider-row">
+    <label for="dci-my-slider"><em>m</em><sub>y</sub> (unit vector component)</label>
+    <input type="range" id="dci-my-slider" min="-100" max="100" value="34" step="1" />
+    <output id="dci-my-out" for="dci-my-slider">0.34</output>
+  </div>
+
+  <dl class="dci-stats" id="dci-stats" aria-live="polite"></dl>
+
+  <div class="dci-charts">
+    <div class="dci-chart-panel">
+      <h5>Stereographic radius |<strong>q</strong>|</h5>
+      <p class="dci-ylab">Vertical axis: |<strong>q</strong>| &nbsp;&middot;&nbsp; Horizontal axis: <em>m</em><sub>y</sub></p>
+      <canvas id="dci-canvas-r" aria-label="Stereographic radii"></canvas>
+      <div class="dci-legend" id="dci-leg-r"></div>
+    </div>
+    <div class="dci-chart-panel">
+      <h5>Atlas weights <em>w</em><sub>A</sub>, <em>w</em><sub>B</sub></h5>
+      <p class="dci-ylab">Vertical axis: weight (0&ndash;1) &nbsp;&middot;&nbsp; Horizontal axis: <em>m</em><sub>y</sub></p>
+      <canvas id="dci-canvas-w" aria-label="Atlas weights"></canvas>
+      <div class="dci-legend" id="dci-leg-w"></div>
+    </div>
+    <div class="dci-chart-panel dci-chart-panel--wide">
+      <h5>Polar component <strong>m</strong>&middot;<strong>P</strong></h5>
+      <p class="dci-ylab">Vertical axis: <strong>m</strong>&middot;<strong>P</strong> &nbsp;&middot;&nbsp; Horizontal axis: <em>m</em><sub>y</sub></p>
+      <canvas id="dci-canvas-mdot" aria-label="m dot P"></canvas>
+    </div>
+  </div>
+
+  <p class="dci-caption">
+    Dashed vertical line: current <em>m</em><sub>y</sub>.
+    Effective radius |<strong>q</strong>|<sub>eff</sub> = min(|<strong>q</strong><sub>A</sub>|, |<strong>q</strong><sub>B</sub>|)
+    remains bounded: one chart may grow near a pole while the other stays well scaled.
+  </p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var POLE = [0, -1, 0];
+  var E1 = [1, 0, 0];
+  var E2 = [0, 0, 1];
+  var EPS = 0.025;
+  var EXACT_TOL = 1e-12;
+  var N = 201;
+
+  var SERIES = {
+    qA: { label: "|q_A|", hue: 215 },
+    qB: { label: "|q_B|", hue: 38 },
+    qEff: { label: "min(|q_A|, |q_B|)", hue: 152 },
+    wA: { label: "w_A", hue: 215 },
+    wB: { label: "w_B", hue: 38 },
+    mdot: { label: "m·P", hue: 265 },
+  };
+
+  function theme() {
+    var root = document.documentElement;
+    var s = getComputedStyle(root);
+    var dark = root.dataset.theme === "dark" || root.classList.contains("dark");
+    if (!dark && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      var bg = s.getPropertyValue("--color-background").trim();
+      if (bg && (bg === "#1a1a1a" || bg.indexOf("18") === 1)) dark = true;
+    }
+    return {
+      fg: s.getPropertyValue("--color-foreground").trim() || (dark ? "#e8eaed" : "#1a1a1a"),
+      muted: s.getPropertyValue("--color-foreground-muted").trim() || (dark ? "#9aa0a6" : "#5f6368"),
+      bg: s.getPropertyValue("--color-background").trim() || (dark ? "#1a1a1a" : "#ffffff"),
+      panel: s.getPropertyValue("--color-background-secondary").trim() || (dark ? "#252628" : "#f6f7f8"),
+      border: s.getPropertyValue("--color-background-border").trim() || (dark ? "#3c4043" : "#dadce0"),
+      accent: s.getPropertyValue("--color-link").trim() || "#6366f1",
+      dark: dark,
+    };
+  }
+
+  function seriesColor(hue, t) {
+    var sat = t.dark ? 62 : 58;
+    var lit = t.dark ? 68 : 46;
+    return "hsl(" + hue + ", " + sat + "%, " + lit + "%)";
+  }
+
+  function dot3(a, b) {
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  }
+
+  function unitMeridian(my) {
+    var mz = Math.sqrt(Math.max(0, 1 - my * my));
+    return [0, my, mz];
+  }
+
+  function norm3(v) {
+    var n = Math.hypot(v[0], v[1], v[2]);
+    return n > 0 ? [v[0] / n, v[1] / n, v[2] / n] : [0, 0, 1];
+  }
+
+  function cartToStereo(m, chart) {
+    var s = chart === 0 ? 1 : -1;
+    var md = dot3(m, POLE);
+    var den = 1 - s * md;
+    if (Math.abs(den) <= EXACT_TOL) den = 1;
+    return [dot3(m, E1) / den, dot3(m, E2) / den];
+  }
+
+  function capRadius() {
+    return Math.sqrt((2 - EPS) / EPS);
+  }
+
+  function dualProject(m) {
+    var md = dot3(m, POLE);
+    var uvA = cartToStereo(m, 0);
+    var uvB = cartToStereo(m, 1);
+    var uA = uvA[0], vA = uvA[1], uB = uvB[0], vB = uvB[1];
+    var cas = md >= 1 - EXACT_TOL;
+    var cbs = md <= -1 + EXACT_TOL;
+    var cap = capRadius();
+    if (cas) {
+      uB = 0;
+      vB = 0;
+      uA = cap;
+      vA = 0;
+    }
+    if (cbs) {
+      uA = 0;
+      vA = 0;
+      uB = cap;
+      vB = 0;
+    }
+    return { uA: uA, vA: vA, uB: uB, vB: vB, md: md };
+  }
+
+  function weightsFromMdot(md) {
+    return { wA: 0.5 * (1 - md), wB: 0.5 * (1 + md) };
+  }
+
+  var sweep = [];
+  for (var i = 0; i < N; i++) {
+    var my = -1 + (2 * i) / (N - 1);
+    var m = unitMeridian(my);
+    var d = dualProject(m);
+    var qA = Math.hypot(d.uA, d.vA);
+    var qB = Math.hypot(d.uB, d.vB);
+    var w = weightsFromMdot(d.md);
+    sweep.push({ my: my, md: d.md, qA: qA, qB: qB, qEff: Math.min(qA, qB), wA: w.wA, wB: w.wB });
+  }
+
+  function myToIdx(my) {
+    return Math.max(0, Math.min(N - 1, Math.round(((my + 1) / 2) * (N - 1))));
+  }
+
+  function prepCanvas(canvas, plotH) {
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    var cssW = Math.max(rect.width || canvas.clientWidth || 320, 200);
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(plotH * dpr);
+    var ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx: ctx, W: cssW, H: plotH };
+  }
+
+  function drawLineChart(canvas, series, yMin, yMax, myCur, yLabel, plotH) {
+    var t = theme();
+    var c = prepCanvas(canvas, plotH);
+    var ctx = c.ctx;
+    var W = c.W;
+    var H = c.H;
+    var pad = { l: 48, r: 14, t: 12, b: 32 };
+    var plotW = W - pad.l - pad.r;
+    var plotHpx = H - pad.t - pad.b;
+
+    ctx.fillStyle = t.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    var range = yMax - yMin;
+    if (range < 1e-12) range = 1;
+
+    function xPix(i) {
+      return pad.l + (i / (N - 1)) * plotW;
+    }
+    function yPix(v) {
+      return pad.t + plotHpx - ((v - yMin) / range) * plotHpx;
+    }
+
+    ctx.strokeStyle = t.border;
+    ctx.lineWidth = 1;
+    for (var g = 0; g <= 4; g++) {
+      var yv = yMin + (range * g) / 4;
+      var y = yPix(yv);
+      ctx.beginPath();
+      ctx.moveTo(pad.l, y);
+      ctx.lineTo(pad.l + plotW, y);
+      ctx.stroke();
+    }
+
+    ctx.strokeStyle = t.muted;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, pad.t);
+    ctx.lineTo(pad.l, pad.t + plotHpx);
+    ctx.lineTo(pad.l + plotW, pad.t + plotHpx);
+    ctx.stroke();
+
+    ctx.fillStyle = t.muted;
+    ctx.font = "11px system-ui, sans-serif";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.fillText(yMax.toFixed(2), pad.l - 6, yPix(yMax));
+    ctx.fillText(yMin.toFixed(2), pad.l - 6, yPix(yMin));
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText("\u22121", xPix(0), H - 8);
+    ctx.fillText("0", xPix((N - 1) / 2), H - 8);
+    ctx.fillText("+1", xPix(N - 1), H - 8);
+    ctx.fillText("m_y", pad.l + plotW / 2, H - 8);
+
+    series.forEach(function (s) {
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (var j = 0; j < N; j++) {
+        var px = xPix(j);
+        var py = yPix(s.data[j]);
+        if (j === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    });
+
+    var idx = myToIdx(myCur);
+    var mx = xPix(idx);
+    ctx.strokeStyle = t.accent;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.moveTo(mx, pad.t);
+    ctx.lineTo(mx, pad.t + plotHpx);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = t.accent;
+    ctx.beginPath();
+    ctx.arc(mx, yPix(series[0].data[idx]), 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function legend(el, items, t) {
+    el.innerHTML = items
+      .map(function (it) {
+        return (
+          '<span><span class="dci-swatch" style="background:' +
+          it.color +
+          '"></span>' +
+          it.label +
+          "</span>"
+        );
+      })
+      .join("");
+  }
+
+  var slider = document.getElementById("dci-my-slider");
+  var out = document.getElementById("dci-my-out");
+  var stats = document.getElementById("dci-stats");
+
+  var qAdata = sweep.map(function (r) { return r.qA; });
+  var qBdata = sweep.map(function (r) { return r.qB; });
+  var qEdata = sweep.map(function (r) { return r.qEff; });
+  var wAdata = sweep.map(function (r) { return r.wA; });
+  var wBdata = sweep.map(function (r) { return r.wB; });
+  var mdData = sweep.map(function (r) { return r.md; });
+
+  function render() {
+    var t = theme();
+    var my = Number(slider.value) / 100;
+    out.textContent = my.toFixed(2);
+    var row = sweep[myToIdx(my)];
+
+    stats.innerHTML =
+      "<dt>m_y</dt><dd>" + my.toFixed(4) + "</dd>" +
+      "<dt>m_z</dt><dd>" + Math.sqrt(Math.max(0, 1 - my * my)).toFixed(4) + "</dd>" +
+      "<dt>m&middot;P</dt><dd>" + row.md.toFixed(4) + "</dd>" +
+      "<dt>|q_A|</dt><dd>" + row.qA.toFixed(4) + "</dd>" +
+      "<dt>|q_B|</dt><dd>" + row.qB.toFixed(4) + "</dd>" +
+      "<dt>|q|_eff</dt><dd>" + row.qEff.toFixed(4) + "</dd>" +
+      "<dt>w_A</dt><dd>" + row.wA.toFixed(3) + "</dd>" +
+      "<dt>w_B</dt><dd>" + row.wB.toFixed(3) + "</dd>";
+
+    var col = {
+      qA: seriesColor(SERIES.qA.hue, t),
+      qB: seriesColor(SERIES.qB.hue, t),
+      qEff: seriesColor(SERIES.qEff.hue, t),
+      wA: seriesColor(SERIES.wA.hue, t),
+      wB: seriesColor(SERIES.wB.hue, t),
+      mdot: seriesColor(SERIES.mdot.hue, t),
+    };
+
+    legend(document.getElementById("dci-leg-r"), [
+      { color: col.qA, label: SERIES.qA.label },
+      { color: col.qB, label: SERIES.qB.label },
+      { color: col.qEff, label: SERIES.qEff.label },
+    ], t);
+    legend(document.getElementById("dci-leg-w"), [
+      { color: col.wA, label: SERIES.wA.label },
+      { color: col.wB, label: SERIES.wB.label },
+    ], t);
+
+    var qPeak = 0;
+    for (var qi = 0; qi < N; qi++) {
+      qPeak = Math.max(qPeak, qAdata[qi], qBdata[qi], qEdata[qi]);
+    }
+    var qYMax = Math.max(1.05, qPeak * 1.08);
+
+    drawLineChart(
+      document.getElementById("dci-canvas-r"),
+      [
+        { color: col.qA, data: qAdata },
+        { color: col.qB, data: qBdata },
+        { color: col.qEff, data: qEdata },
+      ],
+      0,
+      qYMax,
+      my,
+      "|q|",
+      200
+    );
+    drawLineChart(
+      document.getElementById("dci-canvas-w"),
+      [
+        { color: col.wA, data: wAdata },
+        { color: col.wB, data: wBdata },
+      ],
+      0,
+      1,
+      my,
+      "weight",
+      200
+    );
+    drawLineChart(
+      document.getElementById("dci-canvas-mdot"),
+      [{ color: col.mdot, data: mdData }],
+      -1.05,
+      1.05,
+      my,
+      "m·P",
+      170
+    );
+  }
+
+  slider.addEventListener("input", render);
+  window.addEventListener("resize", render);
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+  }
+  var obs = new MutationObserver(render);
+  obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-theme"] });
+  render();
+})();
+</script>

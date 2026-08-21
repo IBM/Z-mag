@@ -1,0 +1,38 @@
+# Conda environment for Z-mag (DOLFINx / FEniCSx 0.11).
+#
+#   conda env create -f environment.yml
+#   conda activate zmag
+#   pip install "git+https://github.com/jorgensd/adios4dolfinx.git"
+#
+# Notes:
+# - Python 3.12 (conda-forge DOLFINx 0.11 builds are 3.11/3.12).
+# - OpenMPI is the supported MPI stack.
+# - adios4dolfinx is not yet on conda-forge for 0.11; install via pip after create.
+#   ADIOS2 itself comes from conda (MPI build) via the adios2 package below.
+
+name: zmag
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - fenics-dolfinx=0.11.*
+  - fenics-ffcx=0.11.*
+  - fenics-basix=0.11.*
+  - fenics-ufl
+  - openmpi
+  - mpi4py
+  - petsc
+  - petsc4py
+  - slepc
+  - slepc4py
+  - adios2=*=mpi_openmpi*
+  - numpy
+  - scipy
+  - matplotlib
+  - meshio
+  - gmsh
+  - python-gmsh
+  - pyvista
+  - pip
+  - pip:
+      - numba
