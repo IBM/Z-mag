@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "If you use Z-mag, please cite the paper below."
+title: Z-mag
+type: software
+url: "https://github.com/IBM/Z-mag"
+repository-code: "https://github.com/IBM/Z-mag"
+license: MIT
+authors:
+  - family-names: Brach
+    given-names: Stella
+    orcid: "https://orcid.org/0000-0003-4766-8131"
+  - family-names: Soldà
+    given-names: Federico
+  - family-names: Aebischer
+    given-names: Kathrin
+    orcid: "https://orcid.org/0000-0001-7825-3655"
+  - family-names: Lantz
+    given-names: Mark A.
+    orcid: "https://orcid.org/0000-0003-3705-3352"
+preferred-citation:
+  type: article
+  title: "Z-mag: A two-chart stereographic formulation for finite-element micromagnetic simulations"
+  authors:
+    - family-names: Brach
+      given-names: Stella
+      orcid: "https://orcid.org/0000-0003-4766-8131"
+    - family-names: Soldà
+      given-names: Federico
+    - family-names: Aebischer
+      given-names: Kathrin
+      orcid: "https://orcid.org/0000-0001-7825-3655"
+    - family-names: Lantz
+      given-names: Mark A.
+      orcid: "https://orcid.org/0000-0003-3705-3352"
+  journal: "Computer Methods in Applied Mechanics and Engineering"
+  year: 2026
+  volume: "462"
+  pages: "119290"
+  doi: "10.1016/j.cma.2026.119290"
+  url: "https://doi.org/10.1016/j.cma.2026.119290"
+  issn: "0045-7825"

@@ -13,6 +13,7 @@ Version tags use [Semantic Versioning](https://semver.org/).
 - Hybrid FEM–BEM magnetostatics helpers and C++ BEM assembler sources
 - Sphinx documentation under `Zmag_bins/docs/`
 - Example drivers: Standard Problem 3, precession–damping, checkpoint / restart
+- Citation metadata for the CMAME paper (`CITATION.cff`, README, Sphinx overview)
 
 ### Requires
 

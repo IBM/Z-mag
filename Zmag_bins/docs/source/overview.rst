@@ -57,6 +57,37 @@ with each tag pins the exact DOLFINx / FEniCSx stack required by that release.
 Installation instructions are in :doc:`installation`.
 
 
+How to cite
+-----------
+
+If you use ``Z-mag`` in published work, please cite:
+
+   Stella Brach, Federico Soldà, Kathrin Aebischer, and Mark A. Lantz.
+   Z-mag: A two-chart stereographic formulation for finite-element
+   micromagnetic simulations.
+   *Computer Methods in Applied Mechanics and Engineering* **462** (2026) 119290.
+   `doi:10.1016/j.cma.2026.119290 <https://doi.org/10.1016/j.cma.2026.119290>`_
+
+BibTeX (also in ``CITATION.cff`` and the repository ``README.md``):
+
+.. code-block:: bibtex
+
+   @article{brach2026zmag,
+     title     = {{Z-mag}: A two-chart stereographic formulation for finite-element micromagnetic simulations},
+     author    = {Brach, Stella and Sold{\`a}, Federico and Aebischer, Kathrin and Lantz, Mark A.},
+     journal   = {Computer Methods in Applied Mechanics and Engineering},
+     volume    = {462},
+     pages     = {119290},
+     year      = {2026},
+     issn      = {0045-7825},
+     doi       = {10.1016/j.cma.2026.119290},
+     url       = {https://doi.org/10.1016/j.cma.2026.119290}
+   }
+
+The same entry is :cite:`brach2026zmag` in this manual.  For a specific software
+snapshot, cite the git tag or commit as well.
+
+
 License and contributors
 ------------------------
 

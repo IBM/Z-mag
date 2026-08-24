@@ -45,7 +45,8 @@ Recommended reading order
 
 .. note::
    ``Z-mag`` is under active development. API and defaults may change between
-   releases; cite the repository revision you use for reproducible studies.
+   releases. Please cite the paper :cite:`brach2026zmag` and the repository
+   revision you use; see :doc:`overview`.
 
 Contents
 --------
