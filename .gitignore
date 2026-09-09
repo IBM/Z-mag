@@ -26,7 +26,6 @@ checkpoint/
 logs/
 
 # Local-only / not part of the public tree
-joss_paper/
 INSTALL_CLUSTER.md
 _chk_energy_np.py
 run_common_ccc.sh
@@ -37,6 +36,11 @@ bem_assembler/standalone
 Zmag_bins/docs/source/_archive/
 release.exclude
 release_*/
+release_*.tar.gz
+
+# JOSS generated previews (keep paper.md, paper.bib, figures, paper.pdf)
+joss_paper/paper_preview.html
+joss_paper/jats/
 
 # IDE
 .vscode/

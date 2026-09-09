@@ -27,17 +27,15 @@ proceed with :ref:`install-latest` from that checkout.
    * - Tag
      - Status
      - Summary
+   * - ``v1.0.0``
+     - First public release
+     - Stereographic dynamic ``demag`` / ``nodemag`` solvers; hybrid FEM–BEM
+       magnetostatics; Sphinx manual; example drivers (Standard Problem 3,
+       precession–damping, checkpoint / restart). Requires DOLFINx / FEniCSx
+       **0.11** (see ``environment.yml``).
    * - ``main``
-     - Current checkout
-     - First public tree:
-
-       - Stereographic dynamic ``demag`` / ``nodemag`` solvers
-       - Hybrid FEM–BEM magnetostatics helpers
-       - Sphinx manual under ``Zmag_bins/docs/``
-       - Example drivers (Standard Problem 3, precession–damping, checkpoint / restart)
-       - Runtime stack pinned in ``environment.yml`` (FEniCSx / DOLFINx, PETSc, Gmsh, MPI I/O)
-
-       The first tagged release will be ``v1.0.0``.
+     - Development tip
+     - Matches ``v1.0.0`` until the next tagged release.
 
 Subsequent releases will be recorded here as new tags are published.  Detailed
 release notes are maintained in ``CHANGELOG.md`` at the repository root.

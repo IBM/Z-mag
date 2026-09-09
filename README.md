@@ -63,6 +63,10 @@ GitHub also exposes this metadata via [CITATION.cff](CITATION.cff) (**Cite this 
 
 [MIT](LICENSE)
 
+## Contributing
+
+Bug reports, questions, and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Versioning
 
 Software releases are git tags (`v1.0.0`, …) described in [CHANGELOG.md](CHANGELOG.md). The package import name `Zmag_bins` does not change between versions.

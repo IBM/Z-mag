@@ -5,7 +5,7 @@ All notable changes to the public Z-mag releases are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 Version tags use [Semantic Versioning](https://semver.org/).
 
-## [1.0.0] - unreleased
+## [1.0.0] - 2026-09-09
 
 ### Added
 
@@ -14,6 +14,7 @@ Version tags use [Semantic Versioning](https://semver.org/).
 - Sphinx documentation under `Zmag_bins/docs/`
 - Example drivers: Standard Problem 3, precession–damping, checkpoint / restart
 - Citation metadata for the CMAME paper (`CITATION.cff`, README, Sphinx overview)
+- Community guidelines (`CONTRIBUTING.md`)
 
 ### Requires
 
